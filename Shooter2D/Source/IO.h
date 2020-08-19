@@ -9,18 +9,19 @@ class IO
 {
 public:
 	IO(unsigned int width, unsigned int height, const std::string& title);
+	~IO();
 
 	void start();
 
-	void setActiveContext(bool active = true)  { window.setActive(active); }
-	void clearWindow()                         { window.clear(); }
-	void display()                             { window.display(); }
-	void draw(const sf::Sprite* const pSprite) { window.draw(*pSprite); }
-	void drawGameBackground()                  { window.draw(gameBackground); };
-	bool isPressed(unsigned int key)           { return sf::Keyboard::isKeyPressed(static_cast<sf::Keyboard::Key>(key)); }
+	void setActiveContext(bool active = true)      { pWindow->setActive(active); }
+	void clearWindow()                             { pWindow->clear(); }
+	void display()                                 { pWindow->display(); }
+	void draw(const sf::Drawable* const pDrawable) { pWindow->draw(*pDrawable); }
+	void drawGameBackground()                      { pWindow->draw(*pGameBackground); }
+	bool isPressed(unsigned int key)               { return sf::Keyboard::isKeyPressed(static_cast<sf::Keyboard::Key>(key)); }
 	
 private:
-	sf::RenderWindow window;
-	sf::Texture gameBackgroundTexture;
-	sf::Sprite  gameBackground;
+	sf::RenderWindow* pWindow;
+	sf::Texture*      pGameBackgroundTexture;
+	sf::Sprite*       pGameBackground;
 };

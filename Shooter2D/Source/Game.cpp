@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Level.h"
 #include "IO.h"
 #include "Player.h"
 
@@ -28,14 +29,15 @@ Game::~Game()
 std::thread Game::start()
 {
 	auto pPlayer = std::make_shared<Player>(io, sf::Vector2f(500.0f, 500.0f), pMapping);
+	auto pLevel = std::make_shared<Level>(io);
 
 	io->setActiveContext(false);
-	std::thread game(&Game::gameLoop, this, pPlayer);
+	std::thread game(&Game::gameLoop, this, pPlayer, pLevel);
 	
 	return game;
 }
 
-void Game::gameLoop(std::shared_ptr<Player> pPlayer)
+void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel)
 {
 	io->setActiveContext(true);
 
@@ -45,15 +47,25 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer)
 
 	while (!gameOver)
 	{
-		auto elapsedTime = clock.restart().asMilliseconds(); 
+		float elapsedTime = static_cast<float>(clock.restart().asMilliseconds()); 
 
 		checkForPause(clock); // if the game was on pause, clock will be restarted in that function
 
-		pPlayer->move(static_cast<float>(elapsedTime));
+		pPlayer->move(elapsedTime);
+
+		if (pPlayer->fire())
+		{
+			pLevel->addShot(pPlayer->getPosition(), pPlayer.get());
+		}
+
+		pLevel->update(elapsedTime);
 
 		io->clearWindow();
 		io->drawGameBackground();
-		io->draw(pPlayer->getSprite());
+
+		pPlayer->draw();
+		pLevel->draw();
+
 		io->display();
 	}
 

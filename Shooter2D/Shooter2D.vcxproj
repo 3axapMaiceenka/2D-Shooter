@@ -130,16 +130,22 @@
     <ClCompile Include="Source\AnimatedObject.cpp" />
     <ClCompile Include="Source\Game.cpp" />
     <ClCompile Include="Source\IO.cpp" />
+    <ClCompile Include="Source\Level.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\MovingObject.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\ShootingControl.cpp" />
+    <ClCompile Include="Source\Shot.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\AnimatedObject.h" />
     <ClInclude Include="Source\Game.h" />
     <ClInclude Include="Source\IO.h" />
+    <ClInclude Include="Source\Level.h" />
     <ClInclude Include="Source\MovingObject.h" />
     <ClInclude Include="Source\Player.h" />
+    <ClInclude Include="Source\ShootingControl.h" />
+    <ClInclude Include="Source\Shot.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

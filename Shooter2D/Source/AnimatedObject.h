@@ -6,6 +6,10 @@ class AnimatedObject : public MovingObject
 {
 public:
 	AnimatedObject(const sf::Texture* const pTexture, const sf::Vector2f& pos);
+	AnimatedObject(const AnimatedObject& rhs);
+	AnimatedObject(AnimatedObject&& rhs) noexcept;
+	AnimatedObject& operator=(const AnimatedObject& rhs);
+	AnimatedObject& operator=(AnimatedObject&& rhs) noexcept;
 
 protected:
 	virtual float maxFrame() const = 0;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AnimatedObject.h"
+#include "ShootingControl.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -25,6 +26,9 @@ public:
 	virtual int height() const override;
 	virtual void move(float time) override;
 
+	bool fire();
+	void draw() const;
+
 protected:
 	virtual float speed() const override;
 	virtual float maxFrame() const override;
@@ -35,8 +39,10 @@ private:
 	void update(float time);
 
 private:
+	std::unique_ptr<ShootingControl> pShootingControl;
 	std::shared_ptr<MappingKeysToControls> pMapping;
 	IO* io;
 	float speedY;
 	float textureRow;
+	bool shot;
 };

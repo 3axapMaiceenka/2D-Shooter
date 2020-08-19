@@ -4,12 +4,18 @@
 
 #include <string>
 
+
+#include <iostream>
+
+
 Player::Player(IO* io_, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls)
 	: AnimatedObject(Game::getTexture("Resources/Images/player1.png"), pos),
+	  pShootingControl(std::make_unique<ShootingControl>(pos)),
 	  pMapping(pMappingKeysToControls),
 	  io(io_),
 	  speedY(0.0f),
-	  textureRow(0.0f)
+	  textureRow(0.0f),
+	  shot(false)
 { 
 	pSprite->setTextureRect(sf::IntRect(0, 0, width(), height()));
 }
@@ -46,10 +52,22 @@ void Player::update(float time)
 	}
 	if (io->isPressed(pMapping->mapping[PlayerControls::SHOOT]))
 	{
-		static_assert("Not implemented yet");
+		shot = pShootingControl->isDelayOver();
 	}
 
 	changeFrame(time);
+	pShootingControl->update(position);
+}
+
+bool Player::fire()
+{
+	if (shot)
+	{
+		shot = false;
+		return true;
+	}
+
+	return false;
 }
 
 void Player::changeFrame(float time)
@@ -88,4 +106,10 @@ float Player::frameChangeSpeed() const
 float Player::maxFrame() const
 {
 	return 6.0f;
+}
+
+void Player::draw() const
+{
+	io->draw(pSprite.get());
+	io->draw(pShootingControl->getText());
 }

@@ -4,12 +4,19 @@
 #include <SFML/Graphics.hpp>
 
 IO::IO(unsigned int width, unsigned int height, const std::string& title)
-	: window(sf::VideoMode(width, height), title),
-	  gameBackgroundTexture(),
-	  gameBackground()
+	: pWindow(new sf::RenderWindow(sf::VideoMode(width, height), title)),
+	  pGameBackgroundTexture(new sf::Texture),
+	  pGameBackground(new sf::Sprite)
 {
-	gameBackgroundTexture.loadFromFile("Resources/Images/background.png");
-	gameBackground.setTexture(gameBackgroundTexture);
+	pGameBackgroundTexture->loadFromFile("Resources/Images/background.png");
+	pGameBackground->setTexture(*pGameBackgroundTexture);
+}
+
+IO::~IO()
+{
+	delete pWindow;
+	delete pGameBackgroundTexture;
+	delete pGameBackground;
 }
 
 void IO::start()
@@ -17,11 +24,11 @@ void IO::start()
 	Game game(this);
 	auto gameThread = game.start();
 	
-	while (window.isOpen())
+	while (pWindow->isOpen())
 	{
 		sf::Event event;
 
-		while (window.pollEvent(event))
+		while (pWindow->pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
 			{
@@ -30,7 +37,7 @@ void IO::start()
 				gameThread.join();
 				setActiveContext(true);
 
-				window.close();
+				pWindow->close();
 			}
 		}
 	}
