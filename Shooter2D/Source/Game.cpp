@@ -58,7 +58,13 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 			pLevel->addShot(pPlayer->getPosition(), pPlayer.get());
 		}
 
-		pLevel->update(elapsedTime);
+		if (!pLevel->update(elapsedTime))
+		{
+			io->clearWindow();  // temporary
+			io->display();
+
+			break;
+		}
 
 		io->clearWindow();
 		io->drawGameBackground();

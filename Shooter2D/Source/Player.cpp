@@ -4,10 +4,6 @@
 
 #include <string>
 
-
-#include <iostream>
-
-
 Player::Player(IO* io_, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls)
 	: AnimatedObject(Game::getTexture("Resources/Images/player1.png"), pos),
 	  pShootingControl(std::make_unique<ShootingControl>(pos)),
@@ -24,12 +20,19 @@ void Player::move(float time)
 {
 	update(time);
 
-	position.x += time * speedX;
-	position.y += time * speedY;
+	if (speedX || speedY)
+	{
+		position.x += time * speedX;
+		position.y += time * speedY;
 
-	pSprite->setPosition(position);
+		if (position.x < GameBackground::LeftBound) position.x = GameBackground::LeftBound;
+		else if (position.x + width() > GameBackground::RightBound) position.x = GameBackground::RightBound- width();
+		if (position.y < GameBackground::UpperBound) position.y = GameBackground::UpperBound;
+		else if (position.y + height() > GameBackground::LowerBound) position.y = GameBackground::LowerBound - height();
 
-	speedX = speedY = 0.0f;
+		pSprite->setPosition(position);
+		speedX = speedY = 0.0f;
+	}
 }
 
 void Player::update(float time)

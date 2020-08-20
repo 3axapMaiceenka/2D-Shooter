@@ -4,7 +4,9 @@ MovingObject::MovingObject(const sf::Texture* const pTexture, const sf::Vector2f
 	: position(pos),
 	  pSprite(std::make_shared<sf::Sprite>(*pTexture)),
 	  speedX(0.0f)
-{ }
+{ 
+	pSprite->setPosition(position);
+}
 
 MovingObject::MovingObject(const MovingObject& rhs)
 	: position(rhs.position),

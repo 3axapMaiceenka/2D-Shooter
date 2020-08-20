@@ -3,19 +3,14 @@
 
 #include <SFML/Graphics.hpp>
 
-IO::IO(unsigned int width, unsigned int height, const std::string& title)
-	: pWindow(new sf::RenderWindow(sf::VideoMode(width, height), title)),
-	  pGameBackgroundTexture(new sf::Texture),
-	  pGameBackground(new sf::Sprite)
-{
-	pGameBackgroundTexture->loadFromFile("Resources/Images/background.png");
-	pGameBackground->setTexture(*pGameBackgroundTexture);
-}
+IO::IO(const std::string& title)
+	: pWindow(new sf::RenderWindow(sf::VideoMode(static_cast<unsigned>(GameBackground::RightBound), static_cast<unsigned>(GameBackground::LowerBound)), title)),
+	  pGameBackground(new GameBackground)
+{ }
 
 IO::~IO()
 {
 	delete pWindow;
-	delete pGameBackgroundTexture;
 	delete pGameBackground;
 }
 
@@ -41,4 +36,18 @@ void IO::start()
 			}
 		}
 	}
+}
+
+GameBackground::GameBackground()
+	: pTexture(new sf::Texture),
+	  pSprite(new sf::Sprite)
+{
+	pTexture->loadFromFile("Resources/Images/background.png");
+	pSprite->setTexture(*pTexture);
+}
+
+GameBackground::~GameBackground()
+{
+	delete pTexture;
+	delete pSprite;
 }
