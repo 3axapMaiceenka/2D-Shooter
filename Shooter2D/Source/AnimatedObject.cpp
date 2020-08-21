@@ -47,19 +47,18 @@ AnimatedObject& AnimatedObject::operator=(AnimatedObject&& rhs) noexcept
 
 void AnimatedObject::changeFrame(float time)
 {
-	changeFrameImpl(time);
-}
-
-void AnimatedObject::changeFrameImpl(float time)
-{
-	currentFrame += frameChangeSpeed() * time;
+	increaseFrame(time);
 
 	if (currentFrame >= maxFrame())
 	{
 		currentFrame = 0.0f;
 	}
 
-	textureCoord.x = static_cast<int>(currentFrame) * width();
+	setTextureCoord();
+}
 
+void AnimatedObject::setTextureCoord()
+{
+	textureCoord.x = static_cast<int>(currentFrame) * width();
 	pSprite->setTextureRect({ textureCoord.x, textureCoord.y, width(), height() });
 }

@@ -4,7 +4,7 @@ ShootingControl::ShootingControl(const sf::Vector2f& position)
 	: timer(),
 	  pFont(new sf::Font),
 	  pText(new sf::Text),
-	  delay(5000),
+	  delay(1000),
 	  fontSize(13)
 {
 	pFont->loadFromFile("Resources/Fonts/arial.ttf");

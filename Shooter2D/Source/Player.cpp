@@ -77,7 +77,7 @@ void Player::changeFrame(float time)
 {
 	if (speedX || speedY)
 	{
-		changeFrameImpl(time);
+		AnimatedObject::changeFrame(time);
 	}
 	else
 	{

@@ -4,6 +4,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <thread>
 
 struct GameBackground
 {
@@ -13,7 +14,7 @@ struct GameBackground
 	// These variables define screen size and limit moving objects displacement
 	static constexpr float LeftBound  = 0.0f;
 	static constexpr float RightBound = 1167.0f;
-	static constexpr float UpperBound = 193.0f;
+	static constexpr float UpperBound = 195.0f;
 	static constexpr float LowerBound = 741.0f;
 
 	const sf::Sprite* sprite() const { return pSprite; }
@@ -37,6 +38,9 @@ public:
 	void draw(const sf::Drawable* const pDrawable) { pWindow->draw(*pDrawable); }
 	void drawGameBackground()                      { pWindow->draw(*pGameBackground->sprite()); }
 	bool isPressed(unsigned int key)               { return sf::Keyboard::isKeyPressed(static_cast<sf::Keyboard::Key>(key)); }
+
+private:
+	void stop(std::thread&& gameThread);
 
 public:
 	GameBackground* pGameBackground;

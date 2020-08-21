@@ -22,8 +22,9 @@ public:
 	Game(IO* io_);
 	~Game();
 
-	std::thread start();
 	void finishGame();
+	std::thread start();
+	bool isGameFinished();
 
 	static const sf::Texture* const getTexture(const std::string& filePath) { return pTextureFactory->getTexture(filePath); }
 

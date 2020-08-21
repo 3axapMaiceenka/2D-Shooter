@@ -10,16 +10,23 @@ class Enemy : public AnimatedObject
 {
 public:
 	Enemy(const sf::Texture* const pTexture, const sf::Vector2f& pos, unsigned char health);
+	Enemy(const Enemy& rhs);
+	Enemy(Enemy&& rhs) noexcept;
+	Enemy& operator=(const Enemy& rhs);
+	Enemy& operator=(Enemy&& rhs) noexcept;
 
-	virtual unsigned char moneyForHit() const = 0;
-	virtual void move(float time) override;
 	virtual bool hit(const Shot& shot);
-
+	virtual void move(float time) override;
+	virtual void changeFrame(float time) override;
+	virtual unsigned char moneyForHit() const = 0;
+	
+	bool isDead()  const { return dead; }
 	bool isAlive() const { return alive; }
 
 protected:
 	unsigned char hp;
-	bool alive;
+	bool alive; // if hp == 0, enemy still moves for the time while on death animation (not implemented yet) is working, but the enemy can't be damaged by the player's shot
+	bool dead;  // dead == false untill the death animation ends
 };
 
 class WeakEnemy : public Enemy
@@ -56,18 +63,5 @@ private:
 	sf::Clock timer;
 };*/
 
-class EnemiesFactory
-{
-public:
-	static Enemy* createEnemy();
-	static void increseAllowedEnemiesTypes();
 
-private:
-	static float getRandomCoordinate();
-	static unsigned char getRandomEnemyType();
-
-private:
-	static const unsigned char MaxEnemiesTypes = 3;
-	static unsigned char enemiesTypesAllowed;
-};
 

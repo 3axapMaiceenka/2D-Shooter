@@ -49,7 +49,7 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 	{
 		float elapsedTime = static_cast<float>(clock.restart().asMilliseconds()); 
 
-		checkForPause(clock); // if the game was on pause, clock will be restarted in that function
+		checkForPause(clock); // if the game was on pause, the clock will be restarted in that function
 
 		pPlayer->move(elapsedTime);
 
@@ -60,9 +60,6 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 
 		if (!pLevel->update(elapsedTime))
 		{
-			io->clearWindow();  // temporary
-			io->display();
-
 			break;
 		}
 
@@ -75,6 +72,7 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 		io->display();
 	}
 
+	finished = true;
 	io->setActiveContext(false);
 }
 
@@ -97,6 +95,13 @@ void Game::finishGame()
 
 	pause = true;
 	finished = true;
+}
+
+bool Game::isGameFinished()
+{
+	std::scoped_lock lock(mutex);
+
+	return finished;
 }
 
 sf::Texture* Game::TextureFactory::getTexture(const std::string& filePath)

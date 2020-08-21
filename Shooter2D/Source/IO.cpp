@@ -23,19 +23,29 @@ void IO::start()
 	{
 		sf::Event event;
 
+		if (game.isGameFinished())
+		{
+			stop(std::move(gameThread));
+			return;
+		}
+
 		while (pWindow->pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
 			{
 				game.finishGame();
-
-				gameThread.join();
-				setActiveContext(true);
-
-				pWindow->close();
+				stop(std::move(gameThread));
+				return;
 			}
 		}
 	}
+}
+
+void IO::stop(std::thread&& gameThread)
+{
+	gameThread.join();
+	pWindow->setActive(true);
+	pWindow->close();
 }
 
 GameBackground::GameBackground()

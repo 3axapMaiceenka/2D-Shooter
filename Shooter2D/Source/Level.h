@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Shot.h"
+#include "Enemies.h"
 
+#include <array>
 #include <list>
 
 class IO;
@@ -20,11 +22,30 @@ private:
 	void updateShots(float time);
 	bool updateEnemies(float time);
 
-private:
 	static void enemiesDeleter(std::list<Enemy*>* pEnemies);
 
 private:
+	class EnemiesFactory
+	{
+	public:
+		EnemiesFactory();
+
+		Enemy* createEnemy();
+		void increseAllowedEnemiesTypes();
+
+	private:
+		float getRandomYCoordinate(unsigned char enemyType);
+		unsigned char getRandomEnemyType();
+
+	private:
+		static constexpr unsigned char MaxEnemiesTypes = 3;
+		std::array<std::unique_ptr<Enemy>, MaxEnemiesTypes + 1> enemiesSamples;
+		unsigned char enemiesTypesAllowed;
+	};
+
+private:
 	std::unique_ptr<std::list<Enemy*>, decltype(&Level::enemiesDeleter)> pEnemies;
+	std::unique_ptr<EnemiesFactory> pEnemiesFactory;
 	std::unique_ptr<std::list<Shot>> pShots;
 	IO* io;
 };

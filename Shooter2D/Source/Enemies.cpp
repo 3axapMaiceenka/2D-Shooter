@@ -3,20 +3,64 @@
 #include "Game.h"
 #include "IO.h"
 
-#include <iostream>
-#include <random>
-
-unsigned char EnemiesFactory::enemiesTypesAllowed = 0;
-
 Enemy::Enemy(const sf::Texture* const pTexture, const sf::Vector2f& pos, unsigned char health)
 	: AnimatedObject(pTexture, pos),
 	  hp(health),
-	  alive(true)
+	  alive(true),
+	  dead(false)
 { }
+
+Enemy::Enemy(const Enemy& rhs)
+	: AnimatedObject(rhs),
+	  hp(rhs.hp),
+	  alive(rhs.alive),
+	  dead(rhs.dead)
+{ }
+
+Enemy::Enemy(Enemy&& rhs) noexcept
+	: AnimatedObject(std::move(rhs)),
+	  hp(rhs.hp),
+	  alive(rhs.alive),
+	  dead(rhs.dead)
+{
+	rhs.hp = 0;
+	rhs.alive = true;
+	rhs.dead = false;
+}
+
+Enemy& Enemy::operator=(const Enemy& rhs)
+{
+	if (this != &rhs)
+	{
+		AnimatedObject::operator=(rhs);
+		hp = rhs.hp;
+		alive = rhs.alive;
+		dead = rhs.dead;
+	}
+
+	return *this;
+}
+
+Enemy& Enemy::operator=(Enemy&& rhs) noexcept
+{
+	if (this != &rhs)
+	{
+		AnimatedObject::operator=(std::move(rhs));
+		hp = rhs.hp;
+		alive = rhs.alive;
+		dead = rhs.dead;
+
+		rhs.hp = 0;
+		rhs.alive = true;
+		rhs.dead = false;
+	}
+
+	return *this;
+}
 
 bool Enemy::hit(const Shot& shot)
 {
-	if (sf::Rect<float>(position.x, position.y, static_cast<float>(size().x), static_cast<float>(size().y)).intersects(
+	if (alive && sf::Rect<float>(position.x, position.y, static_cast<float>(size().x), static_cast<float>(size().y)).intersects(
 		{ shot.getX(), shot.getY(), static_cast<float>(shot.size().x), static_cast<float>(shot.size().y) } ))
 	{
 		if (!(--hp))
@@ -38,6 +82,26 @@ void Enemy::move(float time)
 	pSprite->setPosition(position);
 }
 
+void Enemy::changeFrame(float time)
+{
+	increaseFrame(time);
+
+	if (currentFrame >= maxFrame())
+	{
+		if (alive)
+		{
+			currentFrame = 0.0f;
+		}
+		else
+		{
+			currentFrame--;
+			dead = true;
+		}
+	}
+
+	setTextureCoord();
+}
+
 WeakEnemy::WeakEnemy(const sf::Vector2f& pos)
 	: Enemy(Game::getTexture("Resources/Images/enemie1.png"), pos, 3)
 { 
@@ -49,64 +113,6 @@ float WeakEnemy::maxFrame() const
 {
 	if (alive) return 4.0f;
 	return 10.0f;
-}
-
-Enemy* EnemiesFactory::createEnemy()
-{
-	Enemy* pEnemy = nullptr;
-	auto enemyType = getRandomEnemyType();
-
-	switch (enemyType)
-	{
-		case 0:
-		{
-			pEnemy = new WeakEnemy( { GameBackground::LeftBound, getRandomCoordinate() } );
-		} break;
-
-		case 1:
-		{
-			static_assert("EnemiesFactory::createEnemy(). Case 1. Not implemented yet");
-			//pEnemy = new DiagonalMovingEnemy( { GameBackground::LeftBound, getRandomCoordinate() } );
-		} break;
-
-		case 2:
-		{
-			static_assert("EnemiesFactory::createEnemy(). Case 2. Not implemented yet");
-		} break;
-
-		case MaxEnemiesTypes:
-		{
-			static_assert("EnemiesFactory::createEnemy(). Case 3. Not implemented yet");
-		} break;
-	}
-
-	return pEnemy;
-}
-
-void EnemiesFactory::increseAllowedEnemiesTypes()
-{
-	if (++enemiesTypesAllowed > MaxEnemiesTypes)
-	{
-		enemiesTypesAllowed = MaxEnemiesTypes;
-	}
-}
-
-float EnemiesFactory::getRandomCoordinate()
-{
-	std::random_device rd;
-    std::mt19937 generator(rd());
-	std::uniform_real_distribution<float> dist(GameBackground::UpperBound, GameBackground::LowerBound);
-
-	return dist(generator);
-}
-
-unsigned char EnemiesFactory::getRandomEnemyType()
-{
-	std::random_device rd;
-	std::mt19937 generator(rd());
-	std::uniform_int_distribution<std::mt19937::result_type> dist(0, enemiesTypesAllowed);
-
-	return dist(generator);
 }
 
 int WeakEnemy::width()                 const { return 27; }
