@@ -14,7 +14,7 @@ struct GameBackground
 	// These variables define screen size and limit moving objects displacement
 	static constexpr float LeftBound  = 0.0f;
 	static constexpr float RightBound = 1167.0f;
-	static constexpr float UpperBound = 195.0f;
+	static constexpr float UpperBound = 240.0f;
 	static constexpr float LowerBound = 741.0f;
 
 	const sf::Sprite* sprite() const { return pSprite; }

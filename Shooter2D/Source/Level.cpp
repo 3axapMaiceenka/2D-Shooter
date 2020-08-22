@@ -12,7 +12,7 @@ Level::Level(IO* io_)
 	  io(io_)
 { 
 	// temp
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 9; i++)
 	{
 		pEnemies->emplace_back(pEnemiesFactory->createEnemy());
 	}
@@ -79,11 +79,12 @@ void Level::enemiesDeleter(std::list<Enemy*>* pEnemies)
 
 Level::EnemiesFactory::EnemiesFactory()
 	: enemiesSamples(),
-	  enemiesTypesAllowed(0)
+	  enemiesTypesAllowed(3)
 {
 	enemiesSamples[0] = std::make_unique<WeakEnemy>(sf::Vector2f(0.0f, 0.0f));
-	//enemiesSamples[1] = std::make_unique<DiagonalMovingEnemy>(sf::Vector2f(0.0f, 0.0f));
-	//...
+	enemiesSamples[1] = std::make_unique<DiagonalMovingEnemy>(sf::Vector2f(0.0f, 0.0f));
+	enemiesSamples[2] = std::make_unique<JumpingEnemy>(sf::Vector2f(0.0f, 0.0f));
+	enemiesSamples[3] = std::make_unique<StrongEnemy>(sf::Vector2f(0.0f, 0.0f));
 }
 
 Enemy* Level::EnemiesFactory::createEnemy()
@@ -100,17 +101,17 @@ Enemy* Level::EnemiesFactory::createEnemy()
 
 		case 1:
 		{
-			static_assert("EnemiesFactory::createEnemy(). Case 1. Not implemented yet");
+			pEnemy = new DiagonalMovingEnemy({ GameBackground::LeftBound - static_cast<float>(enemiesSamples[enemyType]->width()), getRandomYCoordinate(enemyType) });
 		} break;
 
 		case 2:
 		{
-			static_assert("EnemiesFactory::createEnemy(). Case 2. Not implemented yet");
+			pEnemy = new JumpingEnemy({ GameBackground::LeftBound - static_cast<float>(enemiesSamples[enemyType]->width()), getRandomYCoordinate(enemyType) });
 		} break;
 
 		case MaxEnemiesTypes:
 		{
-			static_assert("EnemiesFactory::createEnemy(). Case 3. Not implemented yet");
+			pEnemy = new StrongEnemy({ GameBackground::LeftBound - static_cast<float>(enemiesSamples[enemyType]->width()), getRandomYCoordinate(enemyType) });
 		} break;
 	}
 
