@@ -18,16 +18,17 @@ void IO::start()
 {
 	Game game(this);
 	auto gameThread = game.start();
-	
+	bool onPause = false; // temp
+
 	while (pWindow->isOpen())
 	{
-		sf::Event event;
-
 		if (game.isGameFinished())
 		{
 			stop(std::move(gameThread));
 			return;
 		}
+
+		sf::Event event;
 
 		while (pWindow->pollEvent(event))
 		{
@@ -36,6 +37,14 @@ void IO::start()
 				game.finishGame();
 				stop(std::move(gameThread));
 				return;
+			}
+			if (event.type == sf::Event::KeyPressed)
+			{
+				if (event.key.code == sf::Keyboard::Key::Escape) 
+				{
+					onPause = !onPause; // temp
+					game.setPause(onPause);
+				}
 			}
 		}
 	}

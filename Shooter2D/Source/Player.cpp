@@ -27,7 +27,7 @@ void Player::move(float time)
 
 		if (position.x < GameBackground::LeftBound) position.x = GameBackground::LeftBound;
 		else if (position.x + width() > GameBackground::RightBound) position.x = GameBackground::RightBound- width();
-		if (position.y < GameBackground::UpperBound) position.y = GameBackground::UpperBound;
+		if (position.y + height() < GameBackground::UpperBound) position.y = GameBackground::UpperBound - height();
 		else if (position.y + height() > GameBackground::LowerBound) position.y = GameBackground::LowerBound - height();
 
 		pSprite->setPosition(position);
@@ -98,7 +98,7 @@ int Player::height() const
 
 float Player::speed() const
 {
-	return 0.07f;
+	return 0.08f;
 }
 
 float Player::frameChangeSpeed() const

@@ -25,6 +25,7 @@ public:
 	void finishGame();
 	std::thread start();
 	bool isGameFinished();
+	void setPause(bool onPause = true);
 
 	static const sf::Texture* const getTexture(const std::string& filePath) { return pTextureFactory->getTexture(filePath); }
 

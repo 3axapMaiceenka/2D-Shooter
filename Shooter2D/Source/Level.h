@@ -7,7 +7,6 @@
 #include <list>
 
 class IO;
-class Enemy;
 
 class Level
 {
@@ -19,6 +18,8 @@ public:
 	void draw() const;
 
 private:
+	void generateEnemies();
+	void removeKilledEnemies();
 	void updateShots(float time);
 	bool updateEnemies(float time);
 
@@ -43,9 +44,23 @@ private:
 		unsigned char enemiesTypesAllowed;
 	};
 
+	struct Wave
+	{
+		sf::Clock clock;
+		const sf::Int32 generationDelayDec = 100;
+		const sf::Int32 generationDelayLimit = 2000;
+		sf::Int32 generationDelay = 5000;
+		unsigned short wave = 0;
+		unsigned short enemiesKilled = 0;
+		unsigned short minEnemiesCount = 4;
+		unsigned short currentEnemiesCount = 0;
+		unsigned short waveOverallEnemiesCount = 8;
+	};
+
 private:
 	std::unique_ptr<std::list<Enemy*>, decltype(&Level::enemiesDeleter)> pEnemies;
 	std::unique_ptr<EnemiesFactory> pEnemiesFactory;
 	std::unique_ptr<std::list<Shot>> pShots;
+	std::unique_ptr<Wave> pWave;
 	IO* io;
 };

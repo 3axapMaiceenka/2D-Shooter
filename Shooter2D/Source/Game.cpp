@@ -89,6 +89,17 @@ void Game::checkForPause(sf::Clock& clock)
 	}
 }
 
+void Game::setPause(bool onPause /* = true */)
+{
+	std::scoped_lock lock(mutex);
+
+	pause = onPause;
+	if (!pause)
+	{
+		state.notify_one();
+	}
+}
+
 void Game::finishGame()
 {
 	std::scoped_lock lock(mutex);

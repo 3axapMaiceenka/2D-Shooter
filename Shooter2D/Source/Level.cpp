@@ -9,33 +9,21 @@ Level::Level(IO* io_)
 	: pEnemies(new std::list<Enemy*>, &Level::enemiesDeleter),
 	  pEnemiesFactory(std::make_unique<EnemiesFactory>()),
 	  pShots(std::make_unique<std::list<Shot>>()),
+	  pWave(std::make_unique<Wave>()),
 	  io(io_)
-{ 
-	// temp
-	for (int i = 0; i < 9; i++)
-	{
-		pEnemies->emplace_back(pEnemiesFactory->createEnemy());
-	}
-}
+{ }
 
 bool Level::update(float time)
 {
+	generateEnemies();
 	updateShots(time);
+
 	return updateEnemies(time);
 }
 
 bool Level::updateEnemies(float time)
 {
-	pEnemies->erase(std::remove_if(pEnemies->begin(), pEnemies->end(), [](Enemy* pEnemy) 
-	{ 
-		if (pEnemy->isDead())
-		{
-			delete pEnemy;
-			return true;
-		}
-
-		return false;
-	}), pEnemies->end());
+	removeKilledEnemies();
 
 	return !std::any_of(pEnemies->cbegin(), pEnemies->cend(), [this, time](Enemy* pEnemy) 
 	{
@@ -47,8 +35,24 @@ bool Level::updateEnemies(float time)
 			pShots->erase(itShot);
 		}
 
-		return pEnemy->getX() + pEnemy->width() >= GameBackground::RightBound; 
+		return pEnemy->getX() - pEnemy->width() >= GameBackground::RightBound; 
 	});
+}
+
+void Level::removeKilledEnemies()
+{
+	pEnemies->erase(std::remove_if(pEnemies->begin(), pEnemies->end(), [this](Enemy* pEnemy)
+	{
+		if (pEnemy->isDead())
+		{
+			delete pEnemy;
+			pWave->enemiesKilled++;
+			pWave->currentEnemiesCount--;
+			return true;
+		}
+
+		return false;
+	}), pEnemies->end());
 }
 
 void Level::updateShots(float time)
@@ -77,14 +81,45 @@ void Level::enemiesDeleter(std::list<Enemy*>* pEnemies)
 	delete pEnemies;
 }
 
+void Level::generateEnemies()
+{
+	if (pWave->enemiesKilled == pWave->waveOverallEnemiesCount)
+	{
+		if (!(++pWave->wave % 5))
+		{
+			pWave->minEnemiesCount++;
+			pEnemiesFactory->increseAllowedEnemiesTypes();
+		}
+
+		pWave->enemiesKilled = 0;
+		pWave->waveOverallEnemiesCount++;
+
+		pWave->generationDelay -= pWave->generationDelayDec;
+		if (pWave->generationDelay < pWave->generationDelayLimit)
+		{
+			pWave->generationDelay = pWave->generationDelayLimit;
+		}
+	}
+	
+	if ((pWave->clock.getElapsedTime().asMilliseconds() >= pWave->generationDelay &&
+		pWave->currentEnemiesCount + pWave->enemiesKilled < pWave->waveOverallEnemiesCount) ||
+		(pWave->currentEnemiesCount < pWave->minEnemiesCount &&
+	    pWave->waveOverallEnemiesCount - pWave->enemiesKilled - pWave->currentEnemiesCount > 0))
+	{
+		pEnemies->emplace_back(pEnemiesFactory->createEnemy());
+		pWave->currentEnemiesCount++;
+		pWave->clock.restart();
+	}
+}
+
 Level::EnemiesFactory::EnemiesFactory()
 	: enemiesSamples(),
-	  enemiesTypesAllowed(3)
+	  enemiesTypesAllowed(0)
 {
 	enemiesSamples[0] = std::make_unique<WeakEnemy>(sf::Vector2f(0.0f, 0.0f));
 	enemiesSamples[1] = std::make_unique<DiagonalMovingEnemy>(sf::Vector2f(0.0f, 0.0f));
 	enemiesSamples[2] = std::make_unique<JumpingEnemy>(sf::Vector2f(0.0f, 0.0f));
-	enemiesSamples[3] = std::make_unique<StrongEnemy>(sf::Vector2f(0.0f, 0.0f));
+	enemiesSamples[MaxEnemiesTypes] = std::make_unique<StrongEnemy>(sf::Vector2f(0.0f, 0.0f));
 }
 
 Enemy* Level::EnemiesFactory::createEnemy()
@@ -130,12 +165,9 @@ float Level::EnemiesFactory::getRandomYCoordinate(unsigned char enemyType)
 {
 	std::random_device rd;
 	std::mt19937 generator(rd());
+	float enemyHeight = static_cast<float>(enemiesSamples[enemyType]->height());
 
-	std::uniform_real_distribution<float> dist
-	(
-		GameBackground::UpperBound - static_cast<float>(enemiesSamples[enemyType]->height()), 
-		GameBackground::LowerBound - static_cast<float>(enemiesSamples[enemyType]->height())
-	);
+	std::uniform_real_distribution<float> dist(GameBackground::UpperBound - enemyHeight, GameBackground::LowerBound - enemyHeight);
 
 	return dist(generator);
 }

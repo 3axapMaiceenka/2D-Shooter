@@ -113,8 +113,8 @@ void Enemy::init()
 }
 
 WeakEnemy::WeakEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie1.png"), pos, 3)
-{ 
+	: Enemy(Game::getTexture("Resources/Images/enemie1.png"), pos, 2) 
+{
 	init();
 }
 
@@ -129,7 +129,7 @@ float WeakEnemy::maxFrame() const
 }
 
 DiagonalMovingEnemy::DiagonalMovingEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie2.png"), pos, 4),
+	: Enemy(Game::getTexture("Resources/Images/enemie2.png"), pos, 2), 
 	  timer(),
 	  speedY(speed())
 {
@@ -140,31 +140,34 @@ void DiagonalMovingEnemy::move(float time)
 {
 	changeFrame(time);
 
-	position.x += speedX * time;
-	position.y += speedY * time;
+	if (alive)
+	{
+		position.x += speedX * time;
+		position.y += speedY * time;
 
-	if (timer.getElapsedTime().asMilliseconds() >= DirectionChangeDelay)
-	{
-		changeDirection();
-	}
-	else
-	{
-		if (position.y + height() >= GameBackground::LowerBound)
+		if (timer.getElapsedTime().asMilliseconds() >= DirectionChangeDelay)
 		{
-			position.y = GameBackground::LowerBound - height();
 			changeDirection();
 		}
 		else
 		{
-			if (position.y + height() <= GameBackground::UpperBound)
+			if (position.y + height() >= GameBackground::LowerBound)
 			{
-				position.y = GameBackground::UpperBound + height();
+				position.y = GameBackground::LowerBound - height();
 				changeDirection();
 			}
+			else
+			{
+				if (position.y + height() <= GameBackground::UpperBound)
+				{
+					position.y = GameBackground::UpperBound + height();
+					changeDirection();
+				}
+			}
 		}
+		
+		pSprite->setPosition(position);
 	}
-
-	pSprite->setPosition(position);
 }
 
 void DiagonalMovingEnemy::changeDirection()
@@ -184,7 +187,7 @@ float DiagonalMovingEnemy::maxFrame() const
 }
 
 JumpingEnemy::JumpingEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie3.png"), pos, 5),
+	: Enemy(Game::getTexture("Resources/Images/enemie3.png"), pos, 5), 
 	  timer(),
 	  onGround(false)
 {
@@ -243,6 +246,8 @@ bool JumpingEnemy::hit(const Shot& shot)
 		if (!alive)
 		{
 			transitionFromOnGround();
+			setTextureCoord();
+			pSprite->setPosition(position);
 		}
 
 		return true;
@@ -279,7 +284,7 @@ float JumpingEnemy::maxFrame() const
 }
 
 StrongEnemy::StrongEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie4.png"), pos, 10)
+	: Enemy(Game::getTexture("Resources/Images/enemie4.png"), pos, 10) 
 {
 	init();
 }
@@ -304,7 +309,7 @@ int DiagonalMovingEnemy::width()                 const { return 27; }
 int DiagonalMovingEnemy::height()                const { return 42; }
 unsigned char DiagonalMovingEnemy::moneyForHit() const { return 30; }
 float DiagonalMovingEnemy::frameChangeSpeed()    const { return 0.015f; }
-float DiagonalMovingEnemy::speed()			     const { return 0.06f; }
+float DiagonalMovingEnemy::speed()			     const { return 0.055f; }
 
 unsigned char JumpingEnemy::moneyForHit() const { return 40; }
 int JumpingEnemy::width()				  const { return 114; }
@@ -314,6 +319,6 @@ float JumpingEnemy::speed()			      const { return 0.08f; }
 int StrongEnemy::width()                 const { return 90; }
 int StrongEnemy::height()                const { return 63; }
 unsigned char StrongEnemy::moneyForHit() const { return 40; }
-float StrongEnemy::speed()               const { return 0.06f; }
+float StrongEnemy::speed()               const { return 0.05f; }
 float StrongEnemy::frameChangeSpeed()    const { return 0.015f; }
 
