@@ -63,7 +63,9 @@ bool Enemy::hit(const Shot& shot)
 	if (alive && sf::Rect<float>(position.x, position.y, static_cast<float>(size().x), static_cast<float>(size().y)).intersects(
 		{ shot.getX(), shot.getY(), static_cast<float>(shot.size().x), static_cast<float>(shot.size().y) } ))
 	{
-		if (!(--hp))
+		hp -= shot.getDamage();
+
+		if (hp <= 0)
 		{
 			currentFrame = maxFrame();
 			alive = false;
@@ -301,24 +303,24 @@ float StrongEnemy::maxFrame() const
 
 int WeakEnemy::width()                 const { return 27; }
 int WeakEnemy::height()                const { return 42; }
-unsigned char WeakEnemy::moneyForHit() const { return 20; }
+unsigned int WeakEnemy::moneyForHit()  const { return 10; }
 float WeakEnemy::speed()               const { return 0.06f; }
 float WeakEnemy::frameChangeSpeed()    const { return 0.015f; }
 
 int DiagonalMovingEnemy::width()                 const { return 27; }
 int DiagonalMovingEnemy::height()                const { return 42; }
-unsigned char DiagonalMovingEnemy::moneyForHit() const { return 30; }
+unsigned int DiagonalMovingEnemy::moneyForHit()  const { return 15; }
 float DiagonalMovingEnemy::frameChangeSpeed()    const { return 0.015f; }
 float DiagonalMovingEnemy::speed()			     const { return 0.055f; }
 
-unsigned char JumpingEnemy::moneyForHit() const { return 40; }
+unsigned int JumpingEnemy::moneyForHit()  const { return 20; }
 int JumpingEnemy::width()				  const { return 114; }
 float JumpingEnemy::frameChangeSpeed()    const { return 0.02f; }
 float JumpingEnemy::speed()			      const { return 0.08f; }
 
 int StrongEnemy::width()                 const { return 90; }
 int StrongEnemy::height()                const { return 63; }
-unsigned char StrongEnemy::moneyForHit() const { return 40; }
+unsigned int StrongEnemy::moneyForHit()  const { return 30; }
 float StrongEnemy::speed()               const { return 0.05f; }
 float StrongEnemy::frameChangeSpeed()    const { return 0.015f; }
 

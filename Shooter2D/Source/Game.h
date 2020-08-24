@@ -9,6 +9,7 @@ enum class PlayerControls;
 class IO;
 class Player;
 class Level;
+class GameInfo;
 
 struct MappingKeysToControls
 {
@@ -30,7 +31,7 @@ public:
 	static const sf::Texture* const getTexture(const std::string& filePath) { return pTextureFactory->getTexture(filePath); }
 
 private:
-	void gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel);
+	void gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo);
 	void checkForPause(sf::Clock& clock);
 
 private:

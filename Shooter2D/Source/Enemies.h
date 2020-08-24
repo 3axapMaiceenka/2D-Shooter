@@ -17,7 +17,7 @@ public:
 
 	virtual bool hit(const Shot& shot);
 	virtual void move(float time) override;
-	virtual unsigned char moneyForHit() const = 0;
+	virtual unsigned int moneyForHit() const = 0;
 	
 	bool isDead()  const { return dead; }
 	bool isAlive() const { return alive; }
@@ -27,8 +27,8 @@ protected:
 	virtual void changeFrame(float time) override;
 
 protected:
-	unsigned char hp;
-	bool alive; // if hp == 0, enemy still moves for the time while on death animation (not implemented yet) is working, but the enemy can't be damaged by the player's shot
+	short hp;
+	bool alive; // if hp <= 0, enemy still moves for the time while on death animation (not implemented yet) is working, but the enemy can't be damaged by the player's shot
 	bool dead;  // dead == false untill the death animation ends
 };
 
@@ -39,7 +39,7 @@ public:
 
 	virtual int width() const override;;
 	virtual int height() const override;
-	virtual unsigned char moneyForHit() const override;
+	virtual unsigned int moneyForHit() const override;
 
 protected:
 	virtual float speed() const override;
@@ -55,7 +55,7 @@ public:
 	virtual int width() const override;;
 	virtual int height() const override;
 	virtual void move(float time) override;
-	virtual unsigned char moneyForHit() const override;
+	virtual unsigned int moneyForHit() const override;
 
 protected:
 	virtual float speed() const override;
@@ -79,7 +79,7 @@ public:
 	virtual int width() const override;;
 	virtual int height() const override;
 	virtual void move(float time) override;
-	virtual unsigned char moneyForHit() const override;
+	virtual unsigned int moneyForHit() const override;
 
 protected:
 	virtual float speed() const override;
@@ -106,7 +106,7 @@ public:
 
 	virtual int width() const override;;
 	virtual int height() const override;
-	virtual unsigned char moneyForHit() const override;
+	virtual unsigned int moneyForHit() const override;
 
 protected:
 	virtual float speed() const override;

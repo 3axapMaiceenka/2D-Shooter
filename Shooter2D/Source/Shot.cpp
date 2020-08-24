@@ -1,23 +1,27 @@
 #include "Game.h"
 #include "Shot.h"
 
-Shot::Shot(const sf::Vector2f& pos, Player* pPlayer_)
+Shot::Shot(const sf::Vector2f& pos, Player* pPlayer_, unsigned char damage_)
 	: MovingObject(Game::getTexture("Resources/Images/shot.png"), { pos.x - width(), pos.y + 10.0f }),
-	  pPlayer(pPlayer_)
+	  pPlayer(pPlayer_),
+	  damage(damage_)
 { 
 	speedX = speed();
 }
 
 Shot::Shot(const Shot& rhs)
 	: MovingObject(rhs),
-	  pPlayer(rhs.pPlayer)
+	  pPlayer(rhs.pPlayer),
+	  damage(rhs.damage)
 { }
 
 Shot::Shot(Shot&& rhs) noexcept
 	: MovingObject(std::move(rhs)),
-	  pPlayer(std::move(rhs.pPlayer))
+	  pPlayer(std::move(rhs.pPlayer)),
+	  damage(rhs.damage)
 {
 	rhs.pPlayer = nullptr;
+	rhs.damage = 0;
 }
 
 Shot& Shot::operator=(const Shot& rhs)
@@ -26,6 +30,7 @@ Shot& Shot::operator=(const Shot& rhs)
 	{
 		MovingObject::operator=(rhs);
 		pPlayer = rhs.pPlayer;
+		damage = rhs.damage;
 	}
 
 	return *this;
@@ -37,6 +42,8 @@ Shot& Shot::operator=(Shot&& rhs) noexcept
 	{
 		MovingObject::operator=(std::move(rhs));
 		pPlayer = std::move(rhs.pPlayer);
+		damage = rhs.damage;
+		rhs.damage = 0;
 		rhs.pPlayer = nullptr;
 	}
 

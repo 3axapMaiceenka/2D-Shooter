@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 
 class IO;
+class GameInfo;
 struct MappingKeysToControls;
 
 enum class PlayerControls
@@ -14,13 +15,19 @@ enum class PlayerControls
 	DOWN,
 	LEFT, 
 	RIGHT,
-	SHOOT
+	SHOOT,
+	RELOAD,
+	GUN1,
+	GUN2,
+	GUN3,
+	GUN4,
+	GUN5,
 };
 
 class Player : public AnimatedObject
 {
 public:
-	Player(IO* io_, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls);
+	Player(IO* io_, std::shared_ptr<GameInfo> pGameInfo, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls);
 
 	virtual int width()  const override;
 	virtual int height() const override;
@@ -28,6 +35,9 @@ public:
 
 	bool fire();
 	void draw() const;
+
+	void increaseMoney(unsigned int value) { pShootingControl->increaseMoney(value); }
+	unsigned char damage() const { return pShootingControl->getCurrentGunDamage(); }
 
 protected:
 	virtual float speed() const override;
@@ -37,12 +47,12 @@ protected:
 
 private:
 	void update(float time);
+	void setNewGun(unsigned char newGun);
 
 private:
 	std::unique_ptr<ShootingControl> pShootingControl;
 	std::shared_ptr<MappingKeysToControls> pMapping;
 	IO* io;
 	float speedY;
-	float textureRow;
 	bool shot;
 };

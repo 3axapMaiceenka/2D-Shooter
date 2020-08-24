@@ -5,11 +5,12 @@
 #include <algorithm>
 #include <random>
 
-Level::Level(IO* io_)
+Level::Level(IO* io_, std::shared_ptr<GameInfo> pGi)
 	: pEnemies(new std::list<Enemy*>, &Level::enemiesDeleter),
 	  pEnemiesFactory(std::make_unique<EnemiesFactory>()),
 	  pShots(std::make_unique<std::list<Shot>>()),
 	  pWave(std::make_unique<Wave>()),
+	  pGameInfo(pGi),
 	  io(io_)
 { }
 
@@ -32,6 +33,7 @@ bool Level::updateEnemies(float time)
 		auto itShot = std::find_if(pShots->begin(), pShots->end(), [pEnemy](const Shot& shot) { return pEnemy->hit(shot); });
 		if (itShot != pShots->end())
 		{
+			itShot->getPlayer()->increaseMoney(pEnemy->moneyForHit());
 			pShots->erase(itShot);
 		}
 
@@ -64,9 +66,9 @@ void Level::updateShots(float time)
 	}), pShots->end());
 }
 
-void Level::addShot(const sf::Vector2f& position, Player* pPlayer)
+void Level::addShot(const sf::Vector2f& position, Player* pPlayer, unsigned char damage)
 {
-	pShots->emplace_back(position, pPlayer);
+	pShots->emplace_back(position, pPlayer, damage);
 }
 
 void Level::draw() const
@@ -94,10 +96,10 @@ void Level::generateEnemies()
 		pWave->enemiesKilled = 0;
 		pWave->waveOverallEnemiesCount++;
 
-		pWave->generationDelay -= pWave->generationDelayDec;
-		if (pWave->generationDelay < pWave->generationDelayLimit)
+		pWave->generationDelay -= pWave->GenerationDelayDec;
+		if (pWave->generationDelay < pWave->GenerationDelayLimit)
 		{
-			pWave->generationDelay = pWave->generationDelayLimit;
+			pWave->generationDelay = pWave->GenerationDelayLimit;
 		}
 	}
 	

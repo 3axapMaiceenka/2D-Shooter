@@ -2,6 +2,7 @@
 #include "Level.h"
 #include "IO.h"
 #include "Player.h"
+#include "GameInfo.h"
 
 #include <SFML/Graphics.hpp>
 #include <thread>
@@ -28,16 +29,17 @@ Game::~Game()
 
 std::thread Game::start()
 {
-	auto pPlayer = std::make_shared<Player>(io, sf::Vector2f(500.0f, 500.0f), pMapping);
-	auto pLevel = std::make_shared<Level>(io);
+	auto pGameInfo = std::make_shared<GameInfo>(io);
+	auto pPlayer = std::make_shared<Player>(io, pGameInfo, sf::Vector2f(500.0f, 500.0f), pMapping);
+	auto pLevel = std::make_shared<Level>(io, pGameInfo);
 
 	io->setActiveContext(false);
-	std::thread game(&Game::gameLoop, this, pPlayer, pLevel);
+	std::thread game(&Game::gameLoop, this, pPlayer, pLevel, pGameInfo);
 	
 	return game;
 }
 
-void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel)
+void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo)
 {
 	io->setActiveContext(true);
 
@@ -55,7 +57,7 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 
 		if (pPlayer->fire())
 		{
-			pLevel->addShot(pPlayer->getPosition(), pPlayer.get());
+			pLevel->addShot(pPlayer->getPosition(), pPlayer.get(), pPlayer->damage());
 		}
 
 		if (!pLevel->update(elapsedTime))
@@ -66,6 +68,7 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 		io->clearWindow();
 		io->drawGameBackground();
 
+		pGameInfo->draw();
 		pPlayer->draw();
 		pLevel->draw();
 
@@ -145,9 +148,15 @@ Game::TextureFactory::~TextureFactory()
 MappingKeysToControls::MappingKeysToControls()
 	: mapping()
 {
-	mapping.emplace(PlayerControls::UP,    static_cast<unsigned int>(sf::Keyboard::Key::W));
-	mapping.emplace(PlayerControls::DOWN,  static_cast<unsigned int>(sf::Keyboard::Key::S));
-	mapping.emplace(PlayerControls::LEFT,  static_cast<unsigned int>(sf::Keyboard::Key::A));
-	mapping.emplace(PlayerControls::RIGHT, static_cast<unsigned int>(sf::Keyboard::Key::D));
-	mapping.emplace(PlayerControls::SHOOT, static_cast<unsigned int>(sf::Keyboard::Key::LShift));
+	mapping.emplace(PlayerControls::UP,     static_cast<unsigned int>(sf::Keyboard::Key::W));
+	mapping.emplace(PlayerControls::DOWN,   static_cast<unsigned int>(sf::Keyboard::Key::S));
+	mapping.emplace(PlayerControls::LEFT,   static_cast<unsigned int>(sf::Keyboard::Key::A));
+	mapping.emplace(PlayerControls::RIGHT,  static_cast<unsigned int>(sf::Keyboard::Key::D));
+	mapping.emplace(PlayerControls::SHOOT,  static_cast<unsigned int>(sf::Keyboard::Key::LShift));
+	mapping.emplace(PlayerControls::RELOAD, static_cast<unsigned int>(sf::Keyboard::Key::R));
+	mapping.emplace(PlayerControls::GUN1,   static_cast<unsigned int>(sf::Keyboard::Key::Num1));
+	mapping.emplace(PlayerControls::GUN2,   static_cast<unsigned int>(sf::Keyboard::Key::Num2));
+	mapping.emplace(PlayerControls::GUN3,   static_cast<unsigned int>(sf::Keyboard::Key::Num3));
+	mapping.emplace(PlayerControls::GUN4,   static_cast<unsigned int>(sf::Keyboard::Key::Num4));
+	mapping.emplace(PlayerControls::GUN5,   static_cast<unsigned int>(sf::Keyboard::Key::Num5));
 }

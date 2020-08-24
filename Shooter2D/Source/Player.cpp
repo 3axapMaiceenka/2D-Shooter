@@ -4,13 +4,12 @@
 
 #include <string>
 
-Player::Player(IO* io_, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls)
+Player::Player(IO* io_, std::shared_ptr<GameInfo> pGameInfo, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls)
 	: AnimatedObject(Game::getTexture("Resources/Images/player1.png"), pos),
-	  pShootingControl(std::make_unique<ShootingControl>(pos)),
+	  pShootingControl(std::make_unique<ShootingControl>(pos, pGameInfo)),
 	  pMapping(pMappingKeysToControls),
 	  io(io_),
 	  speedY(0.0f),
-	  textureRow(0.0f),
 	  shot(false)
 { 
 	pSprite->setTextureRect(sf::IntRect(0, 0, width(), height()));
@@ -41,7 +40,7 @@ void Player::update(float time)
 	{
 		speedY = -speed();
 	}
-	if (io->isPressed(pMapping->mapping[PlayerControls::DOWN]))
+	else if (io->isPressed(pMapping->mapping[PlayerControls::DOWN]))
 	{
 		speedY = speed();
 	}
@@ -49,7 +48,7 @@ void Player::update(float time)
 	{
 		speedX = -speed();
 	}
-	if (io->isPressed(pMapping->mapping[PlayerControls::RIGHT]))
+	else if (io->isPressed(pMapping->mapping[PlayerControls::RIGHT]))
 	{
 		speedX = speed();
 	}
@@ -57,9 +56,44 @@ void Player::update(float time)
 	{
 		shot = pShootingControl->isDelayOver();
 	}
+	if (io->isPressed(pMapping->mapping[PlayerControls::RELOAD]))
+	{
+		pShootingControl->reload();
+	}
+	else if (io->isPressed(pMapping->mapping[PlayerControls::GUN1]))
+	{
+		setNewGun(0);
+	}
+	else if (io->isPressed(pMapping->mapping[PlayerControls::GUN2]))
+	{
+		setNewGun(1);
+
+	}
+	else if (io->isPressed(pMapping->mapping[PlayerControls::GUN3]))
+	{
+		setNewGun(2);
+
+	}
+	else if (io->isPressed(pMapping->mapping[PlayerControls::GUN4]))
+	{
+		setNewGun(3);
+
+	}
+	else if (io->isPressed(pMapping->mapping[PlayerControls::GUN5]))
+	{
+		setNewGun(4);
+	}
 
 	changeFrame(time);
 	pShootingControl->update(position);
+}
+
+void Player::setNewGun(unsigned char newGun)
+{
+	if (pShootingControl->setNewGun(newGun))
+	{
+		textureCoord.y = newGun * height();
+	}
 }
 
 bool Player::fire()
@@ -82,8 +116,15 @@ void Player::changeFrame(float time)
 	else
 	{
 		currentFrame = 0.0f;
-		pSprite->setTextureRect(sf::IntRect(0, static_cast<int>(textureRow * height()), width(), height()));
+		setTextureCoord();
 	}
+}
+
+void Player::draw() const
+{
+	io->draw(pSprite.get());
+	io->draw(pShootingControl->getMoneyLabel());
+	io->draw(pShootingControl->getGunLabel());
 }
 
 int Player::width() const
@@ -109,10 +150,4 @@ float Player::frameChangeSpeed() const
 float Player::maxFrame() const
 {
 	return 6.0f;
-}
-
-void Player::draw() const
-{
-	io->draw(pSprite.get());
-	io->draw(pShootingControl->getText());
 }

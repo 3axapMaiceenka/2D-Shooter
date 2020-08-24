@@ -7,13 +7,14 @@
 #include <list>
 
 class IO;
+class GameInfo;
 
 class Level
 {
 public:
-	Level(IO* io_);
+	Level(IO* io_, std::shared_ptr<GameInfo> pGi);
 
-	void addShot(const sf::Vector2f& position, Player* pPlayer);
+	void addShot(const sf::Vector2f& position, Player* pPlayer, unsigned char damage);
 	bool update(float time);
 	void draw() const;
 
@@ -47,8 +48,8 @@ private:
 	struct Wave
 	{
 		sf::Clock clock;
-		const sf::Int32 generationDelayDec = 100;
-		const sf::Int32 generationDelayLimit = 2000;
+		const sf::Int32 GenerationDelayDec = 100;
+		const sf::Int32 GenerationDelayLimit = 2000;
 		sf::Int32 generationDelay = 5000;
 		unsigned short wave = 0;
 		unsigned short enemiesKilled = 0;
@@ -62,5 +63,6 @@ private:
 	std::unique_ptr<EnemiesFactory> pEnemiesFactory;
 	std::unique_ptr<std::list<Shot>> pShots;
 	std::unique_ptr<Wave> pWave;
+	std::shared_ptr<GameInfo> pGameInfo;
 	IO* io;
 };

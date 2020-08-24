@@ -130,6 +130,7 @@
     <ClCompile Include="Source\AnimatedObject.cpp" />
     <ClCompile Include="Source\Enemies.cpp" />
     <ClCompile Include="Source\Game.cpp" />
+    <ClCompile Include="Source\GameInfo.cpp" />
     <ClCompile Include="Source\IO.cpp" />
     <ClCompile Include="Source\Level.cpp" />
     <ClCompile Include="Source\Main.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="Source\AnimatedObject.h" />
     <ClInclude Include="Source\Enemies.h" />
     <ClInclude Include="Source\Game.h" />
+    <ClInclude Include="Source\GameInfo.h" />
     <ClInclude Include="Source\IO.h" />
     <ClInclude Include="Source\Level.h" />
     <ClInclude Include="Source\MovingObject.h" />
