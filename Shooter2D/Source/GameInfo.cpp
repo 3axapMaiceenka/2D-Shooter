@@ -4,61 +4,87 @@
 #include "IO.h"
 
 GameInfo::GameInfo(IO* io_)
-	: border(BorderSize, sf::Color::Green),
-	  gunImages(),
-	  io(io_)
-{ 
+	: pLabelsBox(new Rectangle(LabelsBoxX, GunImagesOffsetY, LabelsBoxWidth, LabelsBoxHeight, sf::Color::Black, BorderSize, sf::Color::Red)),
+	  pProgressBar(new Rectangle(ProgressBarX, ProgressBarY, 1, ProgressBarHeight, sf::Color::Green)),
+	  pTextBox(new TextBox),
+	  pBorder(new Border(BorderSize, sf::Color::Green)),
+	  pGunImages(new std::vector<sf::Sprite>),
+	  io(io_),
+	  enemiesKilled(0),
+	  wave(1)
+{
 	float offset = 0.0f;
 
 	for (int i = 0; i < GunsNumber; i++)
 	{
-		gunImages.emplace_back(sf::Sprite(*Game::getTexture("Resources/Images/gun" + std::to_string(i + 1) + ".png")));
-		gunImages[i].setPosition(offset + GunImagesOffsetX, GunImagesOffsetY);
-		offset += gunImages[i].getGlobalBounds().width + DistanceBetweenGunImages;
+		pGunImages->emplace_back(sf::Sprite(*Game::getTexture("Resources/Images/gun" + std::to_string(i + 1) + ".png")));
+		(*pGunImages)[i].setPosition(offset + GunImagesOffsetX, GunImagesOffsetY);
+		offset += (*pGunImages)[i].getGlobalBounds().width + DistanceBetweenGunImages;
 	}
 
-	border.createBorderAroundSprite(gunImages.front());
+	pBorder->createBorderAround(pGunImages->front());
+
+	initTextBox();
+}
+
+GameInfo::~GameInfo()
+{
+	delete pLabelsBox;
+	delete pProgressBar;
+	delete pTextBox;
+	delete pBorder;
+}
+
+void GameInfo::initTextBox()
+{
+	pTextBox->pFont = new sf::Font;
+	pTextBox->pFont->loadFromFile("Resources/Fonts/arial.ttf");
+	
+	pTextBox->pWaveLabel = new sf::Text("Wave: 1", *pTextBox->pFont, FontSize);
+	pTextBox->pEnemiesKilledLabel = new sf::Text("Enemies killed: 0", *pTextBox->pFont, FontSize);
+
+	constexpr float Margin = (LabelsBoxHeight - FontSize * 2) / 3.0f;
+	constexpr float LabelX = LabelsBoxX + Margin;
+	constexpr float WaveLabelY = GunImagesOffsetY + Margin;
+	constexpr float EnemiesKilledLabelY = WaveLabelY + FontSize + 5.0f;
+
+	initLabel(pTextBox->pWaveLabel, sf::Color::White, LabelX, WaveLabelY);
+	initLabel(pTextBox->pEnemiesKilledLabel, sf::Color::White, LabelX, EnemiesKilledLabelY);
+}
+
+void GameInfo::initLabel(sf::Text* pLabel, const sf::Color& color, float x, float y)
+{
+	pLabel->setFillColor(color);
+	pLabel->setPosition(x, y);
+}
+
+void GameInfo::incEnemiesKilled(float ratio)
+{
+	pTextBox->pEnemiesKilledLabel->setString("Enemies killed: " + std::to_string(++enemiesKilled));
+	pProgressBar->setWidth(static_cast<int>(ProgressBarMaxWidth / ratio));
+}
+
+void GameInfo::incWave()
+{
+	pTextBox->pWaveLabel->setString("Wave: " + std::to_string(++wave));
+	pProgressBar->setWidth(1);
 }
 
 void GameInfo::draw() const
 {
-	std::for_each(gunImages.begin(), gunImages.end(), [this](const sf::Sprite& sprite) { io->draw(&sprite); });
-	io->draw(&border);
+	std::for_each(pGunImages->begin(), pGunImages->end(), [this](const sf::Sprite& sprite) { io->draw(&sprite); });
+	
+	io->draw(pBorder);
+	io->draw(pLabelsBox);
+	io->draw(pProgressBar);
+	io->draw(pTextBox->pWaveLabel);
+	io->draw(pTextBox->pEnemiesKilledLabel);
 }
 
-void GameInfo::Border::draw(sf::RenderTarget& target, sf::RenderStates states) const
+GameInfo::TextBox::~TextBox()
 {
-	for (auto vao = border.cbegin(); vao != border.cend(); ++vao)
-	{
-		target.draw(*vao, states);
-	}
+	delete pFont;
+	delete pWaveLabel;
+	delete pEnemiesKilledLabel;
 }
 
-GameInfo::Border::Border(std::size_t size, sf::Color borderColor)
-	: border(),
-	  borderSize(size)
-{ 
-	for (std::size_t i = 0; i < borderSize; i++)
-	{
-		border.emplace_back(sf::VertexArray(sf::LineStrip, 5));
-
-		for (std::size_t j = 0; j < 5; j++)
-		{
-			border[i][j].color = borderColor;
-		}
-	}
-}
-
-void GameInfo::Border::createBorderAroundSprite(const sf::Sprite& sprite)
-{
-	auto rectangle = sprite.getGlobalBounds();
-
-	for (std::size_t i = 0; i < borderSize; i++)
-	{
-		border[i][0].position = sf::Vector2f(rectangle.left + 1 + i,                   rectangle.top + 1 + i);
-		border[i][1].position = sf::Vector2f(rectangle.left + rectangle.width + 1 + i, rectangle.top + 1 + i);
-		border[i][2].position = sf::Vector2f(rectangle.left + rectangle.width + 1 + i, rectangle.top + rectangle.height + 1 + i);
-		border[i][3].position = sf::Vector2f(rectangle.left + 1 + i,                   rectangle.top + rectangle.height + 1 + i);
-		border[i][4].position = sf::Vector2f(rectangle.left + 1 + i,                   rectangle.top + 1 + i);
-	}
-}

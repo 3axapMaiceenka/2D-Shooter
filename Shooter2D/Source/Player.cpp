@@ -125,6 +125,7 @@ void Player::draw() const
 	io->draw(pSprite.get());
 	io->draw(pShootingControl->getMoneyLabel());
 	io->draw(pShootingControl->getGunLabel());
+	io->draw(pShootingControl->getAim());
 }
 
 int Player::width() const

@@ -36,8 +36,9 @@ public:
 	bool fire();
 	void draw() const;
 
-	void increaseMoney(unsigned int value) { pShootingControl->increaseMoney(value); }
 	unsigned char damage() const { return pShootingControl->getCurrentGunDamage(); }
+	void increaseMoney(unsigned int value) { pShootingControl->increaseMoney(value); }
+	auto getShotPosition() const { return pShootingControl->getShotPosition(position); }
 
 protected:
 	virtual float speed() const override;

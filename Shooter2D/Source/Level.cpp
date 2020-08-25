@@ -1,6 +1,7 @@
 #include "Level.h"
 #include "Player.h"
 #include "IO.h"
+#include "GameInfo.h"
 
 #include <algorithm>
 #include <random>
@@ -10,6 +11,7 @@ Level::Level(IO* io_, std::shared_ptr<GameInfo> pGi)
 	  pEnemiesFactory(std::make_unique<EnemiesFactory>()),
 	  pShots(std::make_unique<std::list<Shot>>()),
 	  pWave(std::make_unique<Wave>()),
+	  pHitEffects(std::make_unique<std::list<ParticleSystem>>()),
 	  pGameInfo(pGi),
 	  io(io_)
 { }
@@ -17,6 +19,8 @@ Level::Level(IO* io_, std::shared_ptr<GameInfo> pGi)
 bool Level::update(float time)
 {
 	generateEnemies();
+
+	updateHitEffects(time);
 	updateShots(time);
 
 	return updateEnemies(time);
@@ -30,10 +34,11 @@ bool Level::updateEnemies(float time)
 	{
 		pEnemy->move(time);
 
-		auto itShot = std::find_if(pShots->begin(), pShots->end(), [pEnemy](const Shot& shot) { return pEnemy->hit(shot); });
+		auto itShot = std::find_if(pShots->begin(), pShots->end(), [this, pEnemy](const Shot& shot) { return pEnemy->hit(shot); });
 		if (itShot != pShots->end())
 		{
 			itShot->getPlayer()->increaseMoney(pEnemy->moneyForHit());
+			pHitEffects->emplace_back(itShot->getPosition(), 1000);
 			pShots->erase(itShot);
 		}
 
@@ -50,6 +55,7 @@ void Level::removeKilledEnemies()
 			delete pEnemy;
 			pWave->enemiesKilled++;
 			pWave->currentEnemiesCount--;
+			pGameInfo->incEnemiesKilled(static_cast<float>(pWave->waveOverallEnemiesCount) / static_cast<float>(pWave->enemiesKilled));
 			return true;
 		}
 
@@ -66,6 +72,14 @@ void Level::updateShots(float time)
 	}), pShots->end());
 }
 
+void Level::updateHitEffects(float time)
+{
+	pHitEffects->erase(std::remove_if(pHitEffects->begin(), pHitEffects->end(), [time](ParticleSystem& ps)
+	{
+		return !ps.update(time);
+	}), pHitEffects->end());
+}
+
 void Level::addShot(const sf::Vector2f& position, Player* pPlayer, unsigned char damage)
 {
 	pShots->emplace_back(position, pPlayer, damage);
@@ -75,6 +89,7 @@ void Level::draw() const
 {
 	std::for_each(pShots->cbegin(), pShots->cend(), [this](const Shot& shot) { io->draw(shot.getSprite()); });
 	std::for_each(pEnemies->cbegin(), pEnemies->cend(), [this](const Enemy* pEnemy) { io->draw(pEnemy->getSprite()); });
+	std::for_each(pHitEffects->cbegin(), pHitEffects->cend(), [this](const ParticleSystem& ps) { io->draw(&ps); });
 }
 
 void Level::enemiesDeleter(std::list<Enemy*>* pEnemies)
@@ -95,6 +110,7 @@ void Level::generateEnemies()
 
 		pWave->enemiesKilled = 0;
 		pWave->waveOverallEnemiesCount++;
+		pGameInfo->incWave();
 
 		pWave->generationDelay -= pWave->GenerationDelayDec;
 		if (pWave->generationDelay < pWave->GenerationDelayLimit)

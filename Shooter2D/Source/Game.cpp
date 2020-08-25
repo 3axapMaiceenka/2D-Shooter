@@ -57,7 +57,7 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 
 		if (pPlayer->fire())
 		{
-			pLevel->addShot(pPlayer->getPosition(), pPlayer.get(), pPlayer->damage());
+			pLevel->addShot(pPlayer->getShotPosition(), pPlayer.get(), pPlayer->damage());
 		}
 
 		if (!pLevel->update(elapsedTime))

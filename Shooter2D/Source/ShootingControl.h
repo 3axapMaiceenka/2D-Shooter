@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/System/Clock.hpp>
 #include <string>
 #include <vector>
@@ -10,12 +11,16 @@ class GameInfo;
 
 const sf::Color GreenColor = sf::Color(3, 32, 16);
 constexpr unsigned char GunsNumber = 5;
+constexpr unsigned char GunLabelFontSize = 13;
+constexpr unsigned char MoneyLabelFontSize = 10;
 
 #define GUN_LABEL_OFFSET_X    20
 #define GUN_LABEL_OFFSET_Y   -13
-#define MONEY_LABEL_OFFSET_X -19
-#define MONEY_LABEL_OFFSET_Y  15
-#define SET_TEXT_POSITION(pText, position, offsetX, offsetY) pText->setPosition(position.x + (offsetX), position.y + (offsetY));
+#define MONEY_LABEL_OFFSET_X -17
+#define MONEY_LABEL_OFFSET_Y  16
+#define AIM_OFFSET_X         -40
+#define AIM_OFFSET_Y          10
+#define SET_POSITION(pDrawable, position, offsetX, offsetY) pDrawable->setPosition(position.x + (offsetX), position.y + (offsetY));
 
 class ShootingControl
 {
@@ -29,9 +34,11 @@ public:
 	void increaseMoney(unsigned int value);
 	void update(const sf::Vector2f& position);
 
+	const auto getAim() const { return pAim; }
 	const auto getGunLabel() const { return pGunLabel; }
 	const auto getMoneyLabel() const { return pMoneyLabel;  }
 	auto getCurrentGunDamage() const { return guns[currentGun].Damage; }
+	auto getShotPosition(const sf::Vector2f& playerPosition) const { return sf::Vector2f(playerPosition.x - 10.0f, playerPosition.y + AIM_OFFSET_Y); }
 
 private:
 	void initGuns();
@@ -57,7 +64,7 @@ private:
 	sf::Font* pFont;
 	sf::Text* pGunLabel;
 	sf::Text* pMoneyLabel;
+	sf::Sprite* pAim;
 	unsigned int playerMoney;
 	unsigned char currentGun;
-	const unsigned char fontSize;
 };

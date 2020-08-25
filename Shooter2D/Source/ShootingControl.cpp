@@ -1,5 +1,6 @@
 #include "ShootingControl.h"
 #include "GameInfo.h"
+#include "Game.h"
 
 ShootingControl::ShootingControl(const sf::Vector2f& position, std::shared_ptr<GameInfo> pGi)
 	: pGameInfo(pGi),
@@ -8,18 +9,18 @@ ShootingControl::ShootingControl(const sf::Vector2f& position, std::shared_ptr<G
 	  pFont(new sf::Font),
 	  pGunLabel(new sf::Text),
 	  pMoneyLabel(new sf::Text),
+	  pAim(new sf::Sprite(*Game::getTexture("Resources/Images/aim.png"))),
 	  playerMoney(0),
-	  currentGun(0),
-	  fontSize(13)
+	  currentGun(0)
 {
 	initGuns();
 
 	pFont->loadFromFile("Resources/Fonts/arial.ttf");
-
-	initText(pGunLabel, pFont, sf::Color::Red, "0%", fontSize);
-	initText(pMoneyLabel, pFont, sf::Color::Black, "0$", fontSize);
-	SET_TEXT_POSITION(pGunLabel, position, GUN_LABEL_OFFSET_X, GUN_LABEL_OFFSET_Y);
-	SET_TEXT_POSITION(pMoneyLabel, position, MONEY_LABEL_OFFSET_X, MONEY_LABEL_OFFSET_Y);
+	initText(pGunLabel, pFont, sf::Color::Red, "0%", GunLabelFontSize);
+	initText(pMoneyLabel, pFont, GreenColor, "0$", MoneyLabelFontSize);
+	SET_POSITION(pGunLabel, position, GUN_LABEL_OFFSET_X, GUN_LABEL_OFFSET_Y);
+	SET_POSITION(pMoneyLabel, position, MONEY_LABEL_OFFSET_X, MONEY_LABEL_OFFSET_Y);
+	SET_POSITION(pAim, position, AIM_OFFSET_X, AIM_OFFSET_Y);
 
 	timer.restart();
 }
@@ -58,6 +59,7 @@ ShootingControl::~ShootingControl()
 	delete pFont;
 	delete pGunLabel;
 	delete pMoneyLabel;
+	delete pAim;
 }
 
 bool ShootingControl::isDelayOver()
@@ -85,9 +87,9 @@ bool ShootingControl::isDelayOver()
 
 void ShootingControl::update(const sf::Vector2f& position)
 {
-	SET_TEXT_POSITION(pGunLabel, position, GUN_LABEL_OFFSET_X, GUN_LABEL_OFFSET_Y);
-	SET_TEXT_POSITION(pMoneyLabel, position, MONEY_LABEL_OFFSET_X, MONEY_LABEL_OFFSET_Y);
-
+	SET_POSITION(pGunLabel, position, GUN_LABEL_OFFSET_X, GUN_LABEL_OFFSET_Y);
+	SET_POSITION(pMoneyLabel, position, MONEY_LABEL_OFFSET_X, MONEY_LABEL_OFFSET_Y);
+	SET_POSITION(pAim, position, AIM_OFFSET_X, AIM_OFFSET_Y);
 
 	float time = static_cast<float>(timer.getElapsedTime().asMilliseconds());
 

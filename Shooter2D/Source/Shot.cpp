@@ -2,7 +2,7 @@
 #include "Shot.h"
 
 Shot::Shot(const sf::Vector2f& pos, Player* pPlayer_, unsigned char damage_)
-	: MovingObject(Game::getTexture("Resources/Images/shot.png"), { pos.x - width(), pos.y + 10.0f }),
+	: MovingObject(Game::getTexture("Resources/Images/shot.png"), pos),
 	  pPlayer(pPlayer_),
 	  damage(damage_)
 { 

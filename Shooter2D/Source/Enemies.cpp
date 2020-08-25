@@ -131,7 +131,7 @@ float WeakEnemy::maxFrame() const
 }
 
 DiagonalMovingEnemy::DiagonalMovingEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie2.png"), pos, 2), 
+	: Enemy(Game::getTexture("Resources/Images/enemie2.png"), pos, 3), 
 	  timer(),
 	  speedY(speed())
 {
@@ -189,7 +189,7 @@ float DiagonalMovingEnemy::maxFrame() const
 }
 
 JumpingEnemy::JumpingEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie3.png"), pos, 5), 
+	: Enemy(Game::getTexture("Resources/Images/enemie3.png"), pos, 10), 
 	  timer(),
 	  onGround(false)
 {
@@ -286,7 +286,7 @@ float JumpingEnemy::maxFrame() const
 }
 
 StrongEnemy::StrongEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie4.png"), pos, 10) 
+	: Enemy(Game::getTexture("Resources/Images/enemie4.png"), pos, 15) 
 {
 	init();
 }
