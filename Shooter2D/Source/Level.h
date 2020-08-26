@@ -24,7 +24,6 @@ private:
 	void removeKilledEnemies();
 	void updateShots(float time);
 	bool updateEnemies(float time);
-	void updateHitEffects(float time);
 
 	static void enemiesDeleter(std::list<Enemy*>* pEnemies);
 
@@ -65,7 +64,7 @@ private:
 	std::unique_ptr<EnemiesFactory> pEnemiesFactory;
 	std::unique_ptr<std::list<Shot>> pShots;
 	std::unique_ptr<Wave> pWave;
-	std::unique_ptr<std::list<ParticleSystem>> pHitEffects;
+	std::unique_ptr<std::pair<ParticleSystem, bool>> pHitEffect; // pHitEffect->second == true if the particle system should be rendered
 	std::shared_ptr<GameInfo> pGameInfo;
 	IO* io;
 };

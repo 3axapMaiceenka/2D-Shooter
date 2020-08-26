@@ -11,7 +11,7 @@ Level::Level(IO* io_, std::shared_ptr<GameInfo> pGi)
 	  pEnemiesFactory(std::make_unique<EnemiesFactory>()),
 	  pShots(std::make_unique<std::list<Shot>>()),
 	  pWave(std::make_unique<Wave>()),
-	  pHitEffects(std::make_unique<std::list<ParticleSystem>>()),
+	  pHitEffect(std::make_unique<std::pair<ParticleSystem, bool>>(std::make_pair(ParticleSystem(), false))),
 	  pGameInfo(pGi),
 	  io(io_)
 { }
@@ -20,7 +20,7 @@ bool Level::update(float time)
 {
 	generateEnemies();
 
-	updateHitEffects(time);
+	pHitEffect->second = pHitEffect->first.update(time);
 	updateShots(time);
 
 	return updateEnemies(time);
@@ -38,7 +38,7 @@ bool Level::updateEnemies(float time)
 		if (itShot != pShots->end())
 		{
 			itShot->getPlayer()->increaseMoney(pEnemy->moneyForHit());
-			pHitEffects->emplace_back(itShot->getPosition(), 1000);
+			pHitEffect->first = ParticleSystem(itShot->getPosition(), ParticlesCount);
 			pShots->erase(itShot);
 		}
 
@@ -72,14 +72,6 @@ void Level::updateShots(float time)
 	}), pShots->end());
 }
 
-void Level::updateHitEffects(float time)
-{
-	pHitEffects->erase(std::remove_if(pHitEffects->begin(), pHitEffects->end(), [time](ParticleSystem& ps)
-	{
-		return !ps.update(time);
-	}), pHitEffects->end());
-}
-
 void Level::addShot(const sf::Vector2f& position, Player* pPlayer, unsigned char damage)
 {
 	pShots->emplace_back(position, pPlayer, damage);
@@ -89,7 +81,11 @@ void Level::draw() const
 {
 	std::for_each(pShots->cbegin(), pShots->cend(), [this](const Shot& shot) { io->draw(shot.getSprite()); });
 	std::for_each(pEnemies->cbegin(), pEnemies->cend(), [this](const Enemy* pEnemy) { io->draw(pEnemy->getSprite()); });
-	std::for_each(pHitEffects->cbegin(), pHitEffects->cend(), [this](const ParticleSystem& ps) { io->draw(&ps); });
+	
+	if (pHitEffect->second)
+	{
+		io->draw(&pHitEffect->first);
+	}
 }
 
 void Level::enemiesDeleter(std::list<Enemy*>* pEnemies)

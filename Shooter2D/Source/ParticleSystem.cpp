@@ -1,5 +1,6 @@
 #include "ParticleSystem.h"
 
+#include <random>
 #include <vector>
 
 ParticleSystem::ParticleSystem(const sf::Vector2f& position, std::size_t particlesCount)
@@ -7,15 +8,18 @@ ParticleSystem::ParticleSystem(const sf::Vector2f& position, std::size_t particl
 	  vertices(sf::Points, particlesCount),
 	  particles(particlesCount)
 {
+	std::random_device rd;
+	std::mt19937 generator(rd());
+	std::uniform_real_distribution<float> speedYDist(-45.0f, 45.0f);
+	std::uniform_real_distribution<float> speedXDist(0.1f, 0.2f);
+	std::uniform_real_distribution<float> lifeTimeDist(ParticleMinLifeTime, ParticleMaxLifeTime);
+
 	for (std::size_t i = 0; i < particlesCount; i++)
 	{
-		float angle = (std::rand() % 360) * 3.14f / 180.f;
-		float speed = (std::rand() % 50) + 50.f;
-
+		float speed = speedXDist(generator);
 		vertices[i].position = position;
-		particles[i].lifeTime = static_cast<float>((std::rand() % 2000) + 1000);
-		//particles[i].velocity = sf::Vector2f(std::cos(angle) * speed, std::sin(angle) * speed);
-		particles[i].velocity = sf::Vector2f(-0.5f, -0.5f);
+		particles[i].velocity = sf::Vector2f(-speed, speedYDist(generator) * speed * K);
+		particles[i].lifeTime = lifeTimeDist(generator);
 	}
 }
 
@@ -61,19 +65,14 @@ bool ParticleSystem::update(float time)
 		sf::Vertex& vertex = vertices[i];
 
 		particle.lifeTime -= time;
-		if (particle.lifeTime > 0)
-		{
-			aliveParticles = true;
-		}
-		else
-		{
-			continue;
-		}
 
-		float ratio = particle.lifeTime / Time;
+		if (particle.lifeTime > 0.0f) aliveParticles = true;
+		else						  continue;
 
-		vertex.position += particles[i].velocity * time;
-		vertex.color = sf::Color(0, 0, static_cast<sf::Uint8>(ratio * 255.0f));
+		float ratio = ParticleMaxLifeTime / particle.lifeTime;
+
+		vertex.position += particle.velocity * time;
+		vertex.color = sf::Color(static_cast<sf::Uint8>(ratio * 255.0f), 0, 0);
 	}
 
 	return aliveParticles;
