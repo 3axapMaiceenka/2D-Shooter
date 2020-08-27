@@ -1,7 +1,9 @@
 #include "ShootingControl.h"
 #include "GameInfo.h"
-#include "Game.h"
+#include "Factory.h"
 #include "IO.h"
+
+#include <fstream>
 
 GameInfo::GameInfo(IO* io_)
 	: pLabelsBox(new Rectangle(LabelsBoxX, GunImagesOffsetY, LabelsBoxWidth, LabelsBoxHeight, sf::Color::Black, BorderSize, sf::Color::Red)),
@@ -17,7 +19,7 @@ GameInfo::GameInfo(IO* io_)
 
 	for (int i = 0; i < GunsNumber; i++)
 	{
-		pGunImages->emplace_back(sf::Sprite(*Game::getTexture("Resources/Images/gun" + std::to_string(i + 1) + ".png")));
+		pGunImages->emplace_back(sf::Sprite(*TextureFactory::getInstance().loadFromFile("Resources/Images/gun" + std::to_string(i + 1) + ".png")));
 		(*pGunImages)[i].setPosition(offset + GunImagesOffsetX, GunImagesOffsetY);
 		offset += (*pGunImages)[i].getGlobalBounds().width + DistanceBetweenGunImages;
 	}
@@ -37,11 +39,10 @@ GameInfo::~GameInfo()
 
 void GameInfo::initTextBox()
 {
-	pTextBox->pFont = new sf::Font;
-	pTextBox->pFont->loadFromFile("Resources/Fonts/arial.ttf");
+	sf::Font* pFont = FontFactory::getInstance().loadFromFile("Resources/Fonts/arial.ttf");
 	
-	pTextBox->pWaveLabel = new sf::Text("Wave: 1", *pTextBox->pFont, FontSize);
-	pTextBox->pEnemiesKilledLabel = new sf::Text("Enemies killed: 0", *pTextBox->pFont, FontSize);
+	pTextBox->pWaveLabel = new sf::Text("Wave: 1", *pFont, FontSize);
+	pTextBox->pEnemiesKilledLabel = new sf::Text("Enemies killed: 0", *pFont, FontSize);
 
 	constexpr float Margin = (LabelsBoxHeight - FontSize * 2) / 3.0f;
 	constexpr float LabelX = LabelsBoxX + Margin;
@@ -83,8 +84,14 @@ void GameInfo::draw() const
 
 GameInfo::TextBox::~TextBox()
 {
-	delete pFont;
 	delete pWaveLabel;
 	delete pEnemiesKilledLabel;
 }
+
+void GameInfo::saveToFile(std::fstream& file) const
+{
+	file.write(reinterpret_cast<const char*>(&wave), sizeof(unsigned short));
+	file.write(reinterpret_cast<const char*>(&enemiesKilled), sizeof(unsigned short));
+}
+
 

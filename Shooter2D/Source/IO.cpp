@@ -1,5 +1,6 @@
 #include "IO.h"
 #include "Game.h"
+#include "Factory.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -58,15 +59,10 @@ void IO::stop(std::thread&& gameThread)
 }
 
 GameBackground::GameBackground()
-	: pTexture(new sf::Texture),
-	  pSprite(new sf::Sprite)
-{
-	pTexture->loadFromFile("Resources/Images/background.png");
-	pSprite->setTexture(*pTexture);
-}
+	: pSprite(new sf::Sprite(*TextureFactory::getInstance().loadFromFile("Resources/Images/background.png")))
+{ }
 
 GameBackground::~GameBackground()
 {
-	delete pTexture;
 	delete pSprite;
 }

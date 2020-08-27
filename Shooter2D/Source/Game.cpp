@@ -8,24 +8,13 @@
 #include <thread>
 #include <unordered_map>
 
-std::unique_ptr<Game::TextureFactory> Game::pTextureFactory;
-
 Game::Game(IO* io_)
 	: pMapping(std::make_shared<MappingKeysToControls>()),
 	  state(),
 	  mutex(),
 	  io(io_),
-	  gameOver(false),
-	  pause(false),
-	  finished(false)
-{ 
-	pTextureFactory = std::make_unique<TextureFactory>();
-}
-
-Game::~Game()
-{
-	pTextureFactory.reset();
-}
+	  gameOver(false), pause(false), finished(false), shouldSave(false), decisionToSave(false)
+{ }
 
 std::thread Game::start()
 {
@@ -76,6 +65,9 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 	}
 
 	finished = true;
+
+	//saveGame(pGameInfo);
+
 	io->setActiveContext(false);
 }
 
@@ -90,6 +82,31 @@ void Game::checkForPause(sf::Clock& clock)
 		if (finished) gameOver = true;
 		else          clock.restart();
 	}
+}
+
+void Game::saveGame(std::shared_ptr<GameInfo> pGameInfo)
+{
+	std::unique_lock lock(mutex);
+
+	if (!decisionToSave)
+	{
+		state.wait(lock, [this]() { return decisionToSave || shouldSave; });
+
+		if (shouldSave)
+		{
+			//pGameInfo->saveToFile();
+		}
+	}
+}
+
+void Game::setNeedToSave(bool toSave /* = true */)
+{
+	std::scoped_lock lock(mutex);
+
+	shouldSave = toSave;
+	decisionToSave = true;
+
+	state.notify_one();
 }
 
 void Game::setPause(bool onPause /* = true */)
@@ -116,33 +133,6 @@ bool Game::isGameFinished()
 	std::scoped_lock lock(mutex);
 
 	return finished;
-}
-
-sf::Texture* Game::TextureFactory::getTexture(const std::string& filePath)
-{
-	auto it = textureCash.find(filePath);
-	if (it != textureCash.end())
-	{
-		return it->second;
-	}
-
-	auto pTexture = new sf::Texture;
-	if (!pTexture->loadFromFile(filePath))
-	{
-		throw std::runtime_error("Can't load texture from " + filePath);
-	}
-
-	textureCash.emplace(filePath, pTexture);
-
-	return pTexture;
-}
-
-Game::TextureFactory::~TextureFactory()
-{
-	for (auto& pair : textureCash)
-	{
-		delete pair.second;
-	}
 }
 
 MappingKeysToControls::MappingKeysToControls()

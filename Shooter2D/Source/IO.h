@@ -20,7 +20,6 @@ struct GameBackground
 	const sf::Sprite* sprite() const { return pSprite; }
 
 private:
-	sf::Texture* pTexture;
 	sf::Sprite*  pSprite;
 };
 
@@ -42,9 +41,7 @@ public:
 private:
 	void stop(std::thread&& gameThread);
 
-public:
-	GameBackground* pGameBackground;
-
 private:
 	sf::RenderWindow* pWindow; 
+	GameBackground* pGameBackground;
 };

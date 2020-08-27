@@ -146,6 +146,7 @@
     <ClInclude Include="Source\AnimatedObject.h" />
     <ClInclude Include="Source\Border.h" />
     <ClInclude Include="Source\Enemies.h" />
+    <ClInclude Include="Source\Factory.h" />
     <ClInclude Include="Source\Game.h" />
     <ClInclude Include="Source\GameInfo.h" />
     <ClInclude Include="Source\IO.h" />

@@ -1,11 +1,12 @@
-#include "Game.h"
+#include "Factory.h"
 #include "Player.h"
 #include "IO.h"
+#include "Game.h"
 
 #include <string>
 
 Player::Player(IO* io_, std::shared_ptr<GameInfo> pGameInfo, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls)
-	: AnimatedObject(Game::getTexture("Resources/Images/player1.png"), pos),
+	: AnimatedObject(TextureFactory::getInstance().loadFromFile("Resources/Images/player1.png"), pos),
 	  pShootingControl(std::make_unique<ShootingControl>(pos, pGameInfo)),
 	  pMapping(pMappingKeysToControls),
 	  io(io_),
@@ -24,9 +25,9 @@ void Player::move(float time)
 		position.x += time * speedX;
 		position.y += time * speedY;
 
-		if (position.x < GameBackground::LeftBound) position.x = GameBackground::LeftBound;
-		else if (position.x + width() > GameBackground::RightBound) position.x = GameBackground::RightBound- width();
-		if (position.y + height() < GameBackground::UpperBound) position.y = GameBackground::UpperBound - height();
+		if (position.x < GameBackground::LeftBound)                  position.x = GameBackground::LeftBound;
+		else if (position.x + width() > GameBackground::RightBound)  position.x = GameBackground::RightBound- width();
+		if (position.y + height() < GameBackground::UpperBound)      position.y = GameBackground::UpperBound - height();
 		else if (position.y + height() > GameBackground::LowerBound) position.y = GameBackground::LowerBound - height();
 
 		pSprite->setPosition(position);

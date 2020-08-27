@@ -27,9 +27,10 @@ public:
 	GameInfo(IO* io_);
 	~GameInfo();
 
-	void draw() const;
 	void incWave();
+	void draw() const;
 	void incEnemiesKilled(float ratio);
+	void saveToFile(std::fstream& file) const;
 
 	void indicateCurrentGun(unsigned char indx) { pBorder->createBorderAround(pGunImages[0][indx]); }
 
@@ -40,7 +41,6 @@ private:
 private:
 	struct TextBox
 	{
-		sf::Font* pFont = nullptr;
 		sf::Text* pWaveLabel = nullptr;
 		sf::Text* pEnemiesKilledLabel = nullptr;
 

@@ -1,7 +1,7 @@
 #include "Enemies.h"
 #include "Shot.h"
-#include "Game.h"
 #include "IO.h"
+#include "Factory.h"
 
 Enemy::Enemy(const sf::Texture* const pTexture, const sf::Vector2f& pos, unsigned char health)
 	: AnimatedObject(pTexture, pos),
@@ -115,7 +115,7 @@ void Enemy::init()
 }
 
 WeakEnemy::WeakEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie1.png"), pos, 2) 
+	: Enemy(TextureFactory::getInstance().loadFromFile("Resources/Images/enemie1.png"), pos, 2) 
 {
 	init();
 }
@@ -131,7 +131,7 @@ float WeakEnemy::maxFrame() const
 }
 
 DiagonalMovingEnemy::DiagonalMovingEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie2.png"), pos, 3), 
+	: Enemy(TextureFactory::getInstance().loadFromFile("Resources/Images/enemie2.png"), pos, 3),
 	  timer(),
 	  speedY(speed())
 {
@@ -189,7 +189,7 @@ float DiagonalMovingEnemy::maxFrame() const
 }
 
 JumpingEnemy::JumpingEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie3.png"), pos, 10), 
+	: Enemy(TextureFactory::getInstance().loadFromFile("Resources/Images/enemie3.png"), pos, 10),
 	  timer(),
 	  onGround(false)
 {
@@ -286,7 +286,7 @@ float JumpingEnemy::maxFrame() const
 }
 
 StrongEnemy::StrongEnemy(const sf::Vector2f& pos)
-	: Enemy(Game::getTexture("Resources/Images/enemie4.png"), pos, 15) 
+	: Enemy(TextureFactory::getInstance().loadFromFile("Resources/Images/enemie4.png"), pos, 15)
 {
 	init();
 }

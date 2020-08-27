@@ -1,8 +1,8 @@
-#include "Game.h"
 #include "Shot.h"
+#include "Factory.h"
 
 Shot::Shot(const sf::Vector2f& pos, Player* pPlayer_, unsigned char damage_)
-	: MovingObject(Game::getTexture("Resources/Images/shot.png"), pos),
+	: MovingObject(TextureFactory::getInstance().loadFromFile("Resources/Images/shot.png"), pos),
 	  pPlayer(pPlayer_),
 	  damage(damage_)
 { 

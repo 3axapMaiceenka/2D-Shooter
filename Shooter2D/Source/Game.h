@@ -21,31 +21,19 @@ class Game
 {
 public:
 	Game(IO* io_);
-	~Game();
 
 	void finishGame();
 	std::thread start();
 	bool isGameFinished();
 	void setPause(bool onPause = true);
-
-	static const sf::Texture* const getTexture(const std::string& filePath) { return pTextureFactory->getTexture(filePath); }
+	void setNeedToSave(bool toSave = true);
 
 private:
 	void gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo);
 	void checkForPause(sf::Clock& clock);
+	void saveGame(std::shared_ptr<GameInfo> pGameInfo);
 
 private:
-	struct TextureFactory
-	{
-		~TextureFactory();
-		sf::Texture* getTexture(const std::string& filePath);
-
-	private:
-		std::unordered_map<std::string, sf::Texture*> textureCash;
-	};
-
-private:
-	static std::unique_ptr<TextureFactory> pTextureFactory;
 	std::shared_ptr<MappingKeysToControls> pMapping;
 	std::condition_variable state;
 	std::mutex mutex;
@@ -53,4 +41,6 @@ private:
 	bool gameOver;
 	bool pause;
 	bool finished;
+	bool shouldSave;
+	bool decisionToSave;
 };

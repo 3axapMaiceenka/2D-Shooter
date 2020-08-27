@@ -61,7 +61,6 @@ private:
 	std::shared_ptr<GameInfo> pGameInfo;
 	std::vector<Gun> guns;
 	sf::Clock timer;
-	sf::Font* pFont;
 	sf::Text* pGunLabel;
 	sf::Text* pMoneyLabel;
 	sf::Sprite* pAim;

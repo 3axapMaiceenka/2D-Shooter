@@ -1,21 +1,21 @@
 #include "ShootingControl.h"
 #include "GameInfo.h"
-#include "Game.h"
+#include "Factory.h"
 
 ShootingControl::ShootingControl(const sf::Vector2f& position, std::shared_ptr<GameInfo> pGi)
 	: pGameInfo(pGi),
 	  guns(),
 	  timer(),
-	  pFont(new sf::Font),
 	  pGunLabel(new sf::Text),
 	  pMoneyLabel(new sf::Text),
-	  pAim(new sf::Sprite(*Game::getTexture("Resources/Images/aim.png"))),
+	  pAim(new sf::Sprite(*TextureFactory::getInstance().loadFromFile("Resources/Images/aim.png"))),
 	  playerMoney(0),
 	  currentGun(0)
 {
 	initGuns();
 
-	pFont->loadFromFile("Resources/Fonts/arial.ttf");
+	sf::Font* pFont = FontFactory::getInstance().loadFromFile("Resources/Fonts/arial.ttf");
+
 	initText(pGunLabel, pFont, sf::Color::Red, "0%", GunLabelFontSize);
 	initText(pMoneyLabel, pFont, GreenColor, "0$", MoneyLabelFontSize);
 	SET_POSITION(pGunLabel, position, GUN_LABEL_OFFSET_X, GUN_LABEL_OFFSET_Y);
@@ -56,7 +56,6 @@ void ShootingControl::initText(sf::Text* pText, const sf::Font* pFont, const sf:
 
 ShootingControl::~ShootingControl()
 {
-	delete pFont;
 	delete pGunLabel;
 	delete pMoneyLabel;
 	delete pAim;
