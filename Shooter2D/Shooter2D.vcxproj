@@ -135,6 +135,7 @@
     <ClCompile Include="Source\IO.cpp" />
     <ClCompile Include="Source\Level.cpp" />
     <ClCompile Include="Source\Main.cpp" />
+    <ClCompile Include="Source\Menu.cpp" />
     <ClCompile Include="Source\MovingObject.cpp" />
     <ClCompile Include="Source\ParticleSystem.cpp" />
     <ClCompile Include="Source\Player.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Source\GameInfo.h" />
     <ClInclude Include="Source\IO.h" />
     <ClInclude Include="Source\Level.h" />
+    <ClInclude Include="Source\Menu.h" />
     <ClInclude Include="Source\MovingObject.h" />
     <ClInclude Include="Source\ParticleSystem.h" />
     <ClInclude Include="Source\Player.h" />

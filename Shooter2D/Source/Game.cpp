@@ -77,10 +77,18 @@ void Game::checkForPause(sf::Clock& clock)
 
 	if (pause)
 	{	
+		io->setActiveContext(false);
 		state.wait(lock, [this]() { return !pause || finished; } );
 
-		if (finished) gameOver = true;
-		else          clock.restart();
+		if (finished)
+		{
+			gameOver = true;
+		}
+		else
+		{
+			clock.restart();
+			io->setActiveContext(true);
+		}
 	}
 }
 
