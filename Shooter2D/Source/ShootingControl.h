@@ -12,12 +12,12 @@ class GameInfo;
 const sf::Color GreenColor = sf::Color(3, 32, 16);
 constexpr unsigned char GunsNumber = 5;
 constexpr unsigned char GunLabelFontSize = 13;
-constexpr unsigned char MoneyLabelFontSize = 10;
+constexpr unsigned char MoneyLabelFontSize = 13;
 
-#define GUN_LABEL_OFFSET_X    20
-#define GUN_LABEL_OFFSET_Y   -13
-#define MONEY_LABEL_OFFSET_X -17
-#define MONEY_LABEL_OFFSET_Y  16
+#define GUN_LABEL_OFFSET_X   -38
+#define GUN_LABEL_OFFSET_Y   -9
+#define MONEY_LABEL_OFFSET_X  20
+#define MONEY_LABEL_OFFSET_Y -13
 #define AIM_OFFSET_X         -40
 #define AIM_OFFSET_Y          10
 #define SET_POSITION(pDrawable, position, offsetX, offsetY) pDrawable->setPosition(position.x + (offsetX), position.y + (offsetY));

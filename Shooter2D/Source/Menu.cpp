@@ -80,11 +80,11 @@ void Menu::setFontSize(unsigned char size)
 	for (auto& button : buttons)
 	{
 		button->pText->setCharacterSize(fontSize);
-		setButtonTextPosition(*button);
+		setButtonTextPosition(button);
 	}
 }
 
-void Menu::setButtonSize(std::size_t width, std::size_t height)
+void Menu::setButtonsSize(std::size_t width, std::size_t height)
 {
 	buttonWidth = width;
 	buttonHeight = height;
@@ -97,12 +97,32 @@ void Menu::setButtonSize(std::size_t width, std::size_t height)
 	for (auto& button : buttons)
 	{
 		button->pRectnagle->setPosition(buttonRectX, buttonRectY);
-		setButtonTextPosition(*button);
+		setButtonTextPosition(button);
 
 		buttonRectY += (distanceBetweenButtons + buttonHeight);
 	}
 
 	moveIndicator();
+}
+
+void Menu::setButtonWidth(std::size_t indx, std::size_t width)
+{
+	Button* pButton = buttons[indx];
+
+	pButton->pRectnagle->setWidth(width);
+	pButton->pRectnagle->setPosition(static_cast<float>(pRect->getWidth() - pButton->pRectnagle->getWidth()) / 2.0f + pRect->getX(),
+									 pButton->pRectnagle->getY());
+	setButtonTextPosition(pButton);
+
+	if (indicator == indx)
+	{
+		moveIndicator();
+	}
+}
+
+void Menu::removeButtonBorder(std::size_t buttonIndx)
+{
+	buttons[buttonIndx]->pRectnagle->removeBorder();
 }
 
 void Menu::initButton(const std::string& text, std::function<void(void)> function, std::size_t indx)
@@ -111,16 +131,16 @@ void Menu::initButton(const std::string& text, std::function<void(void)> functio
 
 	pButton->pText->setString(text);
 	pButton->onClickFunction = function;
-	setButtonTextPosition(*pButton);
+	setButtonTextPosition(pButton);
 }
 
-void Menu::setButtonTextPosition(Button& button)
+void Menu::setButtonTextPosition(Button* pButton)
 {
-	const auto& textSize = button.pText->getLocalBounds();
-	const auto& buttonRectPos = button.pRectnagle->getPosition();
+	const auto& textSize = pButton->pText->getLocalBounds();
+	const auto& buttonRectPos = pButton->pRectnagle->getPosition();
 
-	button.pText->setPosition(buttonRectPos.x + static_cast<float>(buttonWidth - textSize.width) / 2.0f,
-		                      buttonRectPos.y + static_cast<float>(buttonHeight - fontSize) / 2.0f);
+	pButton->pText->setPosition(buttonRectPos.x + static_cast<float>(pButton->pRectnagle->getWidth() - textSize.width) / 2.0f,
+		                        buttonRectPos.y + static_cast<float>(buttonHeight - fontSize) / 2.0f);
 }
 
 void Menu::calcButtonsParams(float& distance, float& buttonsX, float& firstButtonY)
@@ -153,10 +173,11 @@ void Menu::createMenuObjects(std::size_t count)
 		}
 		else
 		{
-			pButton->pRectnagle->setPosition(buttonRectX, buttonRectY);
+			pButton->pRectnagle->setPosition(static_cast<float>(pRect->getWidth() - pButton->pRectnagle->getWidth()) / 2.0f + pRect->getX(), 
+				                             buttonRectY);
 		}
 
-		setButtonTextPosition(*pButton);
+		setButtonTextPosition(pButton);
 	}
 
 	moveIndicator();
@@ -202,7 +223,7 @@ void Menu::TextLine::addSymbol(char c)
 {
 	std::string text = pText->getString();
 
-	if (c == '\b')
+	if (c == '\b' && !text.empty())
 	{
 		text.erase(--text.end());
 	}
@@ -230,5 +251,16 @@ void Menu::textEntered(char c)
 	if (pTextLine)
 	{
 		pTextLine->addSymbol(c);
+		setButtonTextPosition(pTextLine);
+	}
+}
+
+void Menu::setTextLineStr(std::size_t indx, const std::string& text)
+{
+	TextLine* pTextLine = dynamic_cast<TextLine*>(buttons[indx]);
+	if (pTextLine)
+	{
+		pTextLine->pText->setString(text);
+		pTextLine->pText->setCharacterSize(fontSize);
 	}
 }

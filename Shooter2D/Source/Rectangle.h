@@ -11,6 +11,7 @@ public:
 	Rectangle(const sf::Vector2f& position_, const sf::Vector2i& size, const sf::Color& color, std::size_t borderSize = 0, const sf::Color& borderColor = sf::Color::White);
 	virtual ~Rectangle();
 	
+	void removeBorder();
 	void setWidth(int width);
 	void setHeight(int height);
 	void resize(int width, int height);

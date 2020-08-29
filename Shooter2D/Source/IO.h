@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Menu.h"
+
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -41,7 +43,7 @@ enum class Scenes
 #define ON_PAUSE_SCENE_PTR(scenes)	CURRENT_SCENE_PTR(scenes, Scenes::ON_PAUSE_SCENE)			
 #define SETTINGS_SCENE_PTR(scenes)	CURRENT_SCENE_PTR(scenes, Scenes::SETTINGS_SCENE)			
 #define STATS_SCENE_PTR(scenes)		CURRENT_SCENE_PTR(scenes, Scenes::STATS_SCENE)			
-#define SAVE_GAME_SCENE(scenes)		CURRENT_SCENE_PTR(scenes, Scenes::SVAE_GAME_SCENE)			
+#define SAVE_GAME_SCENE_PTR(scenes)	CURRENT_SCENE_PTR(scenes, Scenes::SAVE_GAME_SCENE)			
 
 class IO
 {
@@ -62,9 +64,19 @@ private:
 	void stopGame();
 	void startGame();
 	void pauseGame();
+
+	void drawCurrentScene()
+	{
+		pWindow->clear();
+		pWindow->draw(*CURRENT_SCENE_PTR(scenes, currentScene));
+		pWindow->display();
+	}
+
 	void createMainScene();
 	void createOnPauseScene();
+	void createGameSavingScene();
 	void killGameThread(std::thread&& gameThread);
+	void createFullWindowSizeScene(Menu** ppScene);
 
 private:
 	sf::RenderWindow* pWindow; 
@@ -74,4 +86,5 @@ private:
 	std::thread gameThread;
 	Scenes currentScene;
 	bool gameOnPause;
+	bool exit;
 };

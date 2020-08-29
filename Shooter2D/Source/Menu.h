@@ -29,9 +29,12 @@ public:
 	void setButtonsColor(const sf::Color& color);
 	void createButtons(std::size_t buttonsNumber);
 	void createTextLines(std::size_t linesNumber);
+	void removeButtonBorder(std::size_t buttonIndx);
 	void setButtonsTextColor(const sf::Color& color);
+	void setButtonWidth(std::size_t indx, std::size_t width);
+	void setTextLineStr(std::size_t indx, const std::string& text);
 	void initButton(const std::string& text, std::function<void(void)> function, std::size_t indx);
-	void setButtonSize(std::size_t width = DefaultButtonWidth, std::size_t height = DefaultButtonHeight);
+	void setButtonsSize(std::size_t width = DefaultButtonWidth, std::size_t height = DefaultButtonHeight);
 
 private:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -55,9 +58,8 @@ private:
 	{
 		void addSymbol(char c);
 	};
-
-private:
-	void setButtonTextPosition(Button& buttton);
+	
+	void setButtonTextPosition(Button* pButtton);
 
 private:
 	std::vector<Button*> buttons;

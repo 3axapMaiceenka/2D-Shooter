@@ -13,6 +13,7 @@ Game::Game(IO* io_)
 	  state(),
 	  mutex(),
 	  io(io_),
+	  activeContext(false),
 	  gameOver(false), pause(false), finished(false), shouldSave(false), decisionToSave(false)
 { }
 
@@ -31,6 +32,7 @@ std::thread Game::start()
 void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo)
 {
 	io->setActiveContext(true);
+	activeContext = true;
 
 	sf::Clock clock;
 	gameOver = false;
@@ -41,6 +43,10 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 		float elapsedTime = static_cast<float>(clock.restart().asMilliseconds()); 
 
 		checkForPause(clock); // if the game was on pause, the clock will be restarted in that function
+		if (finished)
+		{
+			break;
+		}
 
 		pPlayer->move(elapsedTime);
 
@@ -64,11 +70,15 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 		io->display();
 	}
 
-	finished = true;
+	{
+		std::scoped_lock lock(mutex);
 
-	//saveGame(pGameInfo);
+		io->setActiveContext(false);
+		activeContext = false;
+		finished = true;
+	}
 
-	io->setActiveContext(false);
+	saveGame(pGameInfo);
 }
 
 void Game::checkForPause(sf::Clock& clock)
@@ -78,6 +88,7 @@ void Game::checkForPause(sf::Clock& clock)
 	if (pause)
 	{	
 		io->setActiveContext(false);
+		activeContext = false;
 		state.wait(lock, [this]() { return !pause || finished; } );
 
 		if (finished)
@@ -88,6 +99,7 @@ void Game::checkForPause(sf::Clock& clock)
 		{
 			clock.restart();
 			io->setActiveContext(true);
+			activeContext = true;
 		}
 	}
 }
@@ -103,6 +115,7 @@ void Game::saveGame(std::shared_ptr<GameInfo> pGameInfo)
 		if (shouldSave)
 		{
 			//pGameInfo->saveToFile();
+			// not implemented yet
 		}
 	}
 }
@@ -134,6 +147,9 @@ void Game::finishGame()
 
 	pause = true;
 	finished = true;
+	decisionToSave = true;
+
+	state.notify_one();
 }
 
 bool Game::isGameFinished()

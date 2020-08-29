@@ -1,11 +1,11 @@
 #include "IO.h"
-#include "Menu.h"
 #include "Game.h"
 #include "Factory.h"
 
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include <utility>
+#include <mutex>
 
 IO::IO(const std::string& title)
 	: pWindow(new sf::RenderWindow(sf::VideoMode(static_cast<unsigned>(GameBackground::RightBound), static_cast<unsigned>(GameBackground::LowerBound)), title)),
@@ -14,7 +14,7 @@ IO::IO(const std::string& title)
 	  pGame(nullptr),
 	  gameThread(),
 	  currentScene(Scenes::MAIN_SCENE),
-	  gameOnPause(false)
+	  gameOnPause(false), exit(false)
 { 
 	createMainScene();
 }
@@ -29,51 +29,79 @@ IO::~IO()
 
 void IO::createMainScene()
 {
-	MAIN_SCENE_PTR(scenes) = new Menu(GameBackground::RightBound, GameBackground::LowerBound, { 0.0f, 0.0f }, 10.0f,
-		"Resources/Images/menuBackground.png", "Resources/Fonts/arial.ttf");
-
-	MAIN_SCENE_PTR(scenes)->setButtonSize(300, 50);
-	MAIN_SCENE_PTR(scenes)->setButtonsColor(sf::Color::Black);
-	MAIN_SCENE_PTR(scenes)->setButtonsTextColor(sf::Color::White);
-	MAIN_SCENE_PTR(scenes)->setFontSize(30);
+	createFullWindowSizeScene(&MAIN_SCENE_PTR(scenes));
 						 
-	MAIN_SCENE_PTR(scenes)->createButtons(4);
-	MAIN_SCENE_PTR(scenes)->initButton("One Player Game", std::bind(&IO::startGame, this), 0);
-	MAIN_SCENE_PTR(scenes)->initButton("Two Players Game", []() {}, 1);
+	MAIN_SCENE_PTR(scenes)->createButtons(5);
+	MAIN_SCENE_PTR(scenes)->initButton("One Player", std::bind(&IO::startGame, this), 0);
+	MAIN_SCENE_PTR(scenes)->initButton("Two Players", []() {}, 1);
 	MAIN_SCENE_PTR(scenes)->initButton("Stats", []() {}, 2);
 	MAIN_SCENE_PTR(scenes)->initButton("Settings", []() {}, 3);
+	MAIN_SCENE_PTR(scenes)->initButton("Exit", [this] { exit = true; }, 4);
 }
 
 void IO::createOnPauseScene()
 {
 	if (!ON_PAUSE_SCENE_PTR(scenes))
 	{
-		ON_PAUSE_SCENE_PTR(scenes) = new Menu(GameBackground::RightBound, GameBackground::LowerBound, { 0.0f, 0.0f }, 10.0f,
-			"Resources/Images/menuBackground.png", "Resources/Fonts/arial.ttf");
-
-		ON_PAUSE_SCENE_PTR(scenes)->setButtonSize(300, 50);
-		ON_PAUSE_SCENE_PTR(scenes)->setButtonsColor(sf::Color::Black);
-		ON_PAUSE_SCENE_PTR(scenes)->setButtonsTextColor(sf::Color::White);
-		ON_PAUSE_SCENE_PTR(scenes)->setFontSize(30);
+		createFullWindowSizeScene(&ON_PAUSE_SCENE_PTR(scenes));
 
 		ON_PAUSE_SCENE_PTR(scenes)->createButtons(3);
 		ON_PAUSE_SCENE_PTR(scenes)->initButton("Continue", std::bind(&IO::pauseGame, this), 0);
-		ON_PAUSE_SCENE_PTR(scenes)->initButton("Main menu", std::bind(&IO::stopGame, this), 1);
+		ON_PAUSE_SCENE_PTR(scenes)->initButton("Main menu", [this]() { stopGame(); currentScene = Scenes::MAIN_SCENE; }, 1);
 		ON_PAUSE_SCENE_PTR(scenes)->initButton("Seetings", []() {}, 2);
 	}
 }
 
+void IO::createGameSavingScene()
+{
+	if (!SAVE_GAME_SCENE_PTR(scenes))
+	{
+		createFullWindowSizeScene(&SAVE_GAME_SCENE_PTR(scenes));
+		
+		SAVE_GAME_SCENE_PTR(scenes)->createTextLines(1);
+		SAVE_GAME_SCENE_PTR(scenes)->createButtons(2);
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Enter game name for saving", [] {}, 0);
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Save", [] {}, 1);
+
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Do not save", [this] 
+		{ 
+			pGame->setNeedToSave(false);
+			killGameThread(std::move(gameThread)); 
+			currentScene = Scenes::MAIN_SCENE; 
+			SAVE_GAME_SCENE_PTR(scenes)->setTextLineStr(0, "Enter game name for saving");
+		}, 2);
+
+		SAVE_GAME_SCENE_PTR(scenes)->setButtonWidth(0, 400);
+		SAVE_GAME_SCENE_PTR(scenes)->removeButtonBorder(0);
+	}
+}
+
+void IO::createFullWindowSizeScene(Menu** ppScene)
+{
+	*ppScene = new Menu(static_cast<int>(GameBackground::RightBound), 
+						static_cast<int>(GameBackground::LowerBound),
+		                { 0.0f, 0.0f }, 
+						10.0f,
+						"Resources/Images/menuBackground.png", 
+						"Resources/Fonts/arial.ttf");
+
+	(*ppScene)->setButtonsSize(300, 50);
+	(*ppScene)->setButtonsColor(sf::Color::Black);
+	(*ppScene)->setButtonsTextColor(sf::Color::White);
+	(*ppScene)->setFontSize(30);
+}
+
 void IO::start()
 {
-	while (pWindow->isOpen())
+	while (pWindow->isOpen() && !exit)
 	{
 		sf::Event event;
 
 		while (pWindow->pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
+			if (event.type == sf::Event::Closed) 
 			{
-				if (pGame) stopGame();
+				if (pGame) stopGame(); 
 				return;
 			}
 			if (event.type == sf::Event::KeyPressed)
@@ -82,26 +110,34 @@ void IO::start()
 				{
 					pauseGame();
 				}
-				else
+				else if (!pGame || gameOnPause || pGame->isGameFinished())
 				{
 					if (event.key.code == sf::Keyboard::Key::Down)       CURRENT_SCENE_PTR(scenes, currentScene)->down();
 					else if (event.key.code == sf::Keyboard::Key::Up)    CURRENT_SCENE_PTR(scenes, currentScene)->up();
 					else if (event.key.code == sf::Keyboard::Key::Enter) CURRENT_SCENE_PTR(scenes, currentScene)->onClick();
 				}
 			}
+			else if (event.type == sf::Event::TextEntered && (!pGame || pGame->isGameFinished()))
+			{
+				if (event.text.unicode < 128)
+				{
+					CURRENT_SCENE_PTR(scenes, currentScene)->textEntered(static_cast<char>(event.text.unicode));
+				}
+			}
 		}
 
 		if (!pGame || gameOnPause)
 		{
-			pWindow->clear();
-			pWindow->draw(*CURRENT_SCENE_PTR(scenes, currentScene));
-			pWindow->display();
+			drawCurrentScene();
 		}
 		else
 		{
 			if (pGame->isGameFinished())
-			{
-				killGameThread(std::move(gameThread));
+			{			
+				createGameSavingScene();
+				setActiveContext(true);
+				currentScene = Scenes::SAVE_GAME_SCENE;
+				drawCurrentScene();
 			}
 		}
 	}
@@ -112,6 +148,7 @@ void IO::killGameThread(std::thread&& gameThread)
 	gameThread.join();
 	delete pGame;
 	pGame = nullptr;
+	gameOnPause = false;
 	pWindow->setActive(true);
 }
 
@@ -142,7 +179,14 @@ void IO::pauseGame()
 	{
 		currentScene = Scenes::ON_PAUSE_SCENE;
 		createOnPauseScene();
-		setActiveContext(true);
+
+		/* The game thread should invoke setActiveContetx(false) and lock mutex before that thread will invoke pWindow->setActive(true) and will
+		start drawing scene
+		*/
+		while (pGame->activeContext)
+			;
+
+		pWindow->setActive(true);
 	}
 }
 

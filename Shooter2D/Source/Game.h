@@ -4,6 +4,7 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/System/Clock.hpp>
 #include <condition_variable>
+#include <atomic>
 
 enum class PlayerControls;
 class IO;
@@ -38,6 +39,11 @@ private:
 	std::condition_variable state;
 	std::mutex mutex;
 	IO* io;
+
+public:
+	std::atomic_bool activeContext;
+
+private:
 	bool gameOver;
 	bool pause;
 	bool finished;

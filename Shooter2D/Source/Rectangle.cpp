@@ -32,12 +32,17 @@ Rectangle::~Rectangle()
 
 void Rectangle::setPosition(float left, float top)
 {
+	position = { left, top };
+
 	pRectangle[0][0].position = sf::Vector2f(left, top);
 	pRectangle[0][1].position = sf::Vector2f(left + width, top);
 	pRectangle[0][2].position = sf::Vector2f(left + width, top + height);
 	pRectangle[0][3].position = sf::Vector2f(left, top + height);
-
-	pBorder->createBorderAround(*pRectangle);
+	
+	if (pBorder)
+	{
+		pBorder->createBorderAround(*pRectangle);
+	}
 }
 
 void Rectangle::resize(int width_, int height_)
@@ -55,7 +60,10 @@ void Rectangle::setWidth(int width_)
 	pRectangle[0][1].position = sf::Vector2f(position.x + width, position.y);
 	pRectangle[0][2].position = sf::Vector2f(position.x + width, position.y + height);
 
-	pBorder->createBorderAround(*pRectangle);
+	if (pBorder)
+	{
+		pBorder->createBorderAround(*pRectangle);
+	}
 }
 
 void Rectangle::setHeight(int height_)
@@ -65,7 +73,10 @@ void Rectangle::setHeight(int height_)
 	pRectangle[0][2].position = sf::Vector2f(position.x + width, position.y + height);
 	pRectangle[0][3].position = sf::Vector2f(position.x, position.y + height);
 
-	pBorder->createBorderAround(*pRectangle);
+	if (pBorder)
+	{
+		pBorder->createBorderAround(*pRectangle);
+	}
 }			
 
 void Rectangle::setColor(const sf::Color& color)
@@ -79,7 +90,11 @@ void Rectangle::setColor(const sf::Color& color)
 void Rectangle::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(*pRectangle, states);
-	target.draw(*pBorder, states);
+
+	if (pBorder)
+	{
+		target.draw(*pBorder, states);
+	}
 }
 
 TextureRectangle::TextureRectangle(float left, float top, int width, int height, sf::Texture* pTex, std::size_t borderSize, const sf::Color& borderColor)
@@ -106,8 +121,17 @@ void TextureRectangle::setTextureCoord(float width, float height)
 
 void TextureRectangle::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	target.draw(*pBorder, states);
+	if (pBorder)
+	{
+		target.draw(*pBorder, states);
+	}
 
 	states.texture = pTexture;
 	target.draw(*pRectangle, states);
+}
+
+void Rectangle::removeBorder()
+{
+	delete pBorder;
+	pBorder = nullptr;
 }
