@@ -1,9 +1,8 @@
+#include "GameResutlLoader.h"
 #include "ShootingControl.h"
 #include "GameInfo.h"
 #include "Factory.h"
 #include "IO.h"
-
-#include <fstream>
 
 GameInfo::GameInfo(IO* io_)
 	: pLabelsBox(new Rectangle(LabelsBoxX, GunImagesOffsetY, LabelsBoxWidth, LabelsBoxHeight, sf::Color::Black, BorderSize, sf::Color::Red)),
@@ -88,10 +87,9 @@ GameInfo::TextBox::~TextBox()
 	delete pEnemiesKilledLabel;
 }
 
-void GameInfo::saveToFile(std::fstream& file) const
+void GameInfo::saveToFile() const
 {
-	file.write(reinterpret_cast<const char*>(&wave), sizeof(unsigned short));
-	file.write(reinterpret_cast<const char*>(&enemiesKilled), sizeof(unsigned short));
+	GameResultLoader::storeResult(io->getGameName(), wave, enemiesKilled);
 }
 
 

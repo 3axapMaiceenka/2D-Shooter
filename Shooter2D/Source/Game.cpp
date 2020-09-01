@@ -114,8 +114,7 @@ void Game::saveGame(std::shared_ptr<GameInfo> pGameInfo)
 
 		if (shouldSave)
 		{
-			//pGameInfo->saveToFile();
-			// not implemented yet
+			pGameInfo->saveToFile();
 		}
 	}
 }

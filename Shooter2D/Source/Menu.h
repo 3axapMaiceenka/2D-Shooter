@@ -26,11 +26,13 @@ public:
 	void textEntered(char c);
 	void setPosition(float x, float y);
 	void setFontSize(unsigned char size);
+	std::string getTextLineStr(std::size_t indx);
 	void setButtonsColor(const sf::Color& color);
 	void createButtons(std::size_t buttonsNumber);
 	void createTextLines(std::size_t linesNumber);
 	void removeButtonBorder(std::size_t buttonIndx);
 	void setButtonsTextColor(const sf::Color& color);
+	void createConstTextLines(std::size_t linesNumber);
 	void setButtonWidth(std::size_t indx, std::size_t width);
 	void setTextLineStr(std::size_t indx, const std::string& text);
 	void initButton(const std::string& text, std::function<void(void)> function, std::size_t indx);
@@ -40,6 +42,9 @@ private:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	void calcButtonsParams(float& distance, float& buttonsX, float& firstButtonY);
 	void moveIndicator();
+
+	template <typename T>
+	void createMenuObjectsImpl(std::size_t count);
 
 	template <typename T>
 	void createMenuObjects(std::size_t count);
@@ -63,6 +68,7 @@ private:
 
 private:
 	std::vector<Button*> buttons;
+	std::vector<std::size_t> constTextlinesIndexes;
 	TextureRectangle* pRect;
 	sf::Font* pFont;
 	sf::Color* pButtonsColor;

@@ -52,6 +52,7 @@ public:
 	~IO();
 
 	void start();
+	std::string getGameName() const;
 
 	void clearWindow()                             { pWindow->clear(); }
 	void display()                                 { pWindow->display(); }
@@ -64,6 +65,7 @@ private:
 	void stopGame();
 	void startGame();
 	void pauseGame();
+	void saveFinishedGame(bool save);
 
 	void drawCurrentScene()
 	{
@@ -73,6 +75,7 @@ private:
 	}
 
 	void createMainScene();
+	void createStatsScene();
 	void createOnPauseScene();
 	void createGameSavingScene();
 	void killGameThread(std::thread&& gameThread);

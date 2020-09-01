@@ -3,6 +3,7 @@
 
 Menu::Menu(int width, int height, const sf::Vector2f& position, float indicatorRadius, const std::string& textureFilePath, const std::string& fontFilePath)
 	: buttons(),
+	  constTextlinesIndexes(),
 	  pRect(new TextureRectangle(position.x, position.y, width, height, TextureFactory::getInstance().loadFromFile(textureFilePath))),
 	  pFont(FontFactory::getInstance().loadFromFile(fontFilePath)),
 	  pButtonsColor(new sf::Color),
@@ -34,7 +35,9 @@ void Menu::draw(sf::RenderTarget& target, sf::RenderStates states) const
 		target.draw(*pButton->pText, states);
 	});
 
-	if (!buttons.empty())
+	if (buttons.size() != constTextlinesIndexes.size() &&
+		std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
+		== constTextlinesIndexes.end())
 	{
 		target.draw(*pCurrButtonIndicator, states);
 	}
@@ -42,23 +45,31 @@ void Menu::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 void Menu::down()
 {
-	if (++indicator >= buttons.size())
+	if (buttons.size() != constTextlinesIndexes.size())
 	{
-		indicator = 0;
-	}
+		do
+		{
+			if (++indicator >= buttons.size())
+			{
+				indicator = 0;
+			}
+		} while (std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
+			     != constTextlinesIndexes.end());
 
-	if (!buttons.empty())
-	{
 		moveIndicator();
 	}
 }
 
 void Menu::up()
 {
-	indicator ? indicator-- : indicator = buttons.size() - 1;
-
-	if (!buttons.empty())
+	if (buttons.size() != constTextlinesIndexes.size())
 	{
+		do
+		{
+			indicator ? indicator-- : indicator = buttons.size() - 1;
+		} while (std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
+			     != constTextlinesIndexes.end());
+
 		moveIndicator();
 	}
 }
@@ -152,7 +163,7 @@ void Menu::calcButtonsParams(float& distance, float& buttonsX, float& firstButto
 
 // T is either TextLine or Button
 template <typename T>
-void Menu::createMenuObjects(std::size_t count)
+void Menu::createMenuObjectsImpl(std::size_t count)
 {
 	auto prevSize = buttons.size();
 	buttons.insert(buttons.cend(), count, nullptr);
@@ -181,6 +192,22 @@ void Menu::createMenuObjects(std::size_t count)
 	}
 
 	moveIndicator();
+}
+
+template <typename T> // T is either Button or TextLine
+void Menu::createMenuObjects(std::size_t count)
+{
+	if (count)
+	{
+		createMenuObjectsImpl<T>(count);
+
+		if (buttons.size() != constTextlinesIndexes.size() &&
+			std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
+			!= constTextlinesIndexes.end())
+		{
+			down();
+		}
+	}
 }
 
 void Menu::createButtons(std::size_t buttonsNumber)
@@ -247,8 +274,13 @@ void Menu::createTextLines(std::size_t linesNumber)
 
 void Menu::textEntered(char c)
 {
+	if (buttons.empty()) return;
+
 	TextLine* pTextLine = dynamic_cast<TextLine*>(buttons[indicator]);
-	if (pTextLine)
+	auto indx = indicator;
+
+	if (pTextLine && std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [indx](std::size_t i) { return i == indx; })
+		             == constTextlinesIndexes.end())
 	{
 		pTextLine->addSymbol(c);
 		setButtonTextPosition(pTextLine);
@@ -257,10 +289,41 @@ void Menu::textEntered(char c)
 
 void Menu::setTextLineStr(std::size_t indx, const std::string& text)
 {
+	if (buttons.empty()) return;
+
 	TextLine* pTextLine = dynamic_cast<TextLine*>(buttons[indx]);
-	if (pTextLine)
+	if (pTextLine && std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [indx](std::size_t i) { return i == indx; })
+		              == constTextlinesIndexes.end())
 	{
 		pTextLine->pText->setString(text);
 		pTextLine->pText->setCharacterSize(fontSize);
+		setButtonTextPosition(pTextLine);
+	}
+}
+
+std::string Menu::getTextLineStr(std::size_t indx)
+{
+	if (buttons.empty()) return "";
+
+	TextLine* pTextLine = dynamic_cast<TextLine*>(buttons[indx]);
+	if (pTextLine)
+	{
+		return pTextLine->pText->getString();
+	}
+
+	return "";
+}
+
+void Menu::createConstTextLines(std::size_t linesNumber)
+{
+	if (linesNumber)
+	{
+		auto size = buttons.size();
+		for (std::size_t i = 0; i < linesNumber; i++)
+		{
+			constTextlinesIndexes.emplace_back(size + i);
+		}
+
+		createMenuObjectsImpl<TextLine>(linesNumber);
 	}
 }

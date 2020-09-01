@@ -1,6 +1,7 @@
 #include "IO.h"
 #include "Game.h"
 #include "Factory.h"
+#include "GameResutlLoader.h"
 
 #include <SFML/Graphics.hpp>
 #include <functional>
@@ -34,7 +35,7 @@ void IO::createMainScene()
 	MAIN_SCENE_PTR(scenes)->createButtons(5);
 	MAIN_SCENE_PTR(scenes)->initButton("One Player", std::bind(&IO::startGame, this), 0);
 	MAIN_SCENE_PTR(scenes)->initButton("Two Players", []() {}, 1);
-	MAIN_SCENE_PTR(scenes)->initButton("Stats", []() {}, 2);
+	MAIN_SCENE_PTR(scenes)->initButton("Stats", [this] { createStatsScene(); currentScene = Scenes::STATS_SCENE; }, 2);
 	MAIN_SCENE_PTR(scenes)->initButton("Settings", []() {}, 3);
 	MAIN_SCENE_PTR(scenes)->initButton("Exit", [this] { exit = true; }, 4);
 }
@@ -45,10 +46,9 @@ void IO::createOnPauseScene()
 	{
 		createFullWindowSizeScene(&ON_PAUSE_SCENE_PTR(scenes));
 
-		ON_PAUSE_SCENE_PTR(scenes)->createButtons(3);
+		ON_PAUSE_SCENE_PTR(scenes)->createButtons(2);
 		ON_PAUSE_SCENE_PTR(scenes)->initButton("Continue", std::bind(&IO::pauseGame, this), 0);
 		ON_PAUSE_SCENE_PTR(scenes)->initButton("Main menu", [this]() { stopGame(); currentScene = Scenes::MAIN_SCENE; }, 1);
-		ON_PAUSE_SCENE_PTR(scenes)->initButton("Seetings", []() {}, 2);
 	}
 }
 
@@ -61,18 +61,40 @@ void IO::createGameSavingScene()
 		SAVE_GAME_SCENE_PTR(scenes)->createTextLines(1);
 		SAVE_GAME_SCENE_PTR(scenes)->createButtons(2);
 		SAVE_GAME_SCENE_PTR(scenes)->initButton("Enter game name for saving", [] {}, 0);
-		SAVE_GAME_SCENE_PTR(scenes)->initButton("Save", [] {}, 1);
-
-		SAVE_GAME_SCENE_PTR(scenes)->initButton("Do not save", [this] 
-		{ 
-			pGame->setNeedToSave(false);
-			killGameThread(std::move(gameThread)); 
-			currentScene = Scenes::MAIN_SCENE; 
-			SAVE_GAME_SCENE_PTR(scenes)->setTextLineStr(0, "Enter game name for saving");
-		}, 2);
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Save", std::bind(&IO::saveFinishedGame, this, true), 1);
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Do not save", std::bind(&IO::saveFinishedGame, this, false), 2);
 
 		SAVE_GAME_SCENE_PTR(scenes)->setButtonWidth(0, 400);
 		SAVE_GAME_SCENE_PTR(scenes)->removeButtonBorder(0);
+	}
+}
+
+void IO::createStatsScene()
+{
+	if (!STATS_SCENE_PTR(scenes) || GameResultLoader::wasChanged())
+	{
+		delete STATS_SCENE_PTR(scenes);
+		createFullWindowSizeScene(&STATS_SCENE_PTR(scenes));
+
+		auto gameResults = GameResultLoader::loadResults();
+
+		STATS_SCENE_PTR(scenes)->setButtonsSize(600, 35);
+		STATS_SCENE_PTR(scenes)->setFontSize(20);
+		STATS_SCENE_PTR(scenes)->createConstTextLines(gameResults.size());
+		STATS_SCENE_PTR(scenes)->createButtons(1);
+
+		auto size = gameResults.size();
+		for (std::size_t i = 0; i < size; i++)
+		{
+			GameResultLoader::GameResult& result = gameResults[i];
+
+			STATS_SCENE_PTR(scenes)->initButton(std::to_string(i + 1) + "." + result.name +
+				" Wave: " + std::to_string(result.wave) + " Enemies Killed: " + std::to_string(result.enemiesKilled), [] {}, i);
+			STATS_SCENE_PTR(scenes)->removeButtonBorder(i);
+		}
+
+		STATS_SCENE_PTR(scenes)->initButton("Main menu", [this] { currentScene = Scenes::MAIN_SCENE; }, size);
+		STATS_SCENE_PTR(scenes)->setButtonWidth(size, 300);
 	}
 }
 
@@ -106,9 +128,10 @@ void IO::start()
 			}
 			if (event.type == sf::Event::KeyPressed)
 			{
-				if (pGame && event.key.code == sf::Keyboard::Key::Escape)
+				if (event.key.code == sf::Keyboard::Key::Escape)
 				{
-					pauseGame();
+					if (pGame) pauseGame();
+					else       currentScene = Scenes::MAIN_SCENE;											
 				}
 				else if (!pGame || gameOnPause || pGame->isGameFinished())
 				{
@@ -194,4 +217,17 @@ void IO::stopGame()
 {
 	pGame->finishGame();
 	killGameThread(std::move(gameThread));
+}
+
+std::string IO::getGameName() const
+{
+	return SAVE_GAME_SCENE_PTR(scenes) ? SAVE_GAME_SCENE_PTR(scenes)->getTextLineStr(0) : "";
+}
+
+void IO::saveFinishedGame(bool save)
+{
+	pGame->setNeedToSave(save);
+	killGameThread(std::move(gameThread));
+	currentScene = Scenes::MAIN_SCENE;
+	SAVE_GAME_SCENE_PTR(scenes)->setTextLineStr(0, "Enter game name for saving");
 }

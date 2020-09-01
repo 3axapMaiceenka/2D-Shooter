@@ -29,8 +29,8 @@ public:
 
 	void incWave();
 	void draw() const;
+	void saveToFile() const;
 	void incEnemiesKilled(float ratio);
-	void saveToFile(std::fstream& file) const;
 
 	void indicateCurrentGun(unsigned char indx) { pBorder->createBorderAround(pGunImages[0][indx]); }
 

@@ -132,6 +132,7 @@
     <ClCompile Include="Source\Enemies.cpp" />
     <ClCompile Include="Source\Game.cpp" />
     <ClCompile Include="Source\GameInfo.cpp" />
+    <ClCompile Include="Source\GameResultLoader.cpp" />
     <ClCompile Include="Source\IO.cpp" />
     <ClCompile Include="Source\Level.cpp" />
     <ClCompile Include="Source\Main.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Source\Factory.h" />
     <ClInclude Include="Source\Game.h" />
     <ClInclude Include="Source\GameInfo.h" />
+    <ClInclude Include="Source\GameResutlLoader.h" />
     <ClInclude Include="Source\IO.h" />
     <ClInclude Include="Source\Level.h" />
     <ClInclude Include="Source\Menu.h" />
