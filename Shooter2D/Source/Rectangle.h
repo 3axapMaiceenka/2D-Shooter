@@ -44,8 +44,9 @@ public:
 	TextureRectangle(float left, float top, int width, int height, sf::Texture* pTexture, std::size_t borderSize = 0,  const sf::Color& borderColor = sf::Color::White);
 	TextureRectangle(const sf::Vector2f& position_, const sf::Vector2i& size, sf::Texture* pTexture, std::size_t borderSize = 0, const sf::Color& borderColor = sf::Color::White);
 
+	void setTextureCoord(float x, float y, float width, float height);
+
 private:
-	void setTextureCoord(float width, float height);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:

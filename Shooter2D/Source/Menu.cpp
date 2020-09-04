@@ -35,9 +35,7 @@ void Menu::draw(sf::RenderTarget& target, sf::RenderStates states) const
 		target.draw(*pButton->pText, states);
 	});
 
-	if (buttons.size() != constTextlinesIndexes.size() &&
-		std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
-		== constTextlinesIndexes.end())
+	if (buttons.size() != constTextlinesIndexes.size() && !isIndicatorOnConstTextLine())
 	{
 		target.draw(*pCurrButtonIndicator, states);
 	}
@@ -53,8 +51,7 @@ void Menu::down()
 			{
 				indicator = 0;
 			}
-		} while (std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
-			     != constTextlinesIndexes.end());
+		} while (isIndicatorOnConstTextLine());
 
 		moveIndicator();
 	}
@@ -67,8 +64,7 @@ void Menu::up()
 		do
 		{
 			indicator ? indicator-- : indicator = buttons.size() - 1;
-		} while (std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
-			     != constTextlinesIndexes.end());
+		} while (isIndicatorOnConstTextLine());
 
 		moveIndicator();
 	}
@@ -201,9 +197,7 @@ void Menu::createMenuObjects(std::size_t count)
 	{
 		createMenuObjectsImpl<T>(count);
 
-		if (buttons.size() != constTextlinesIndexes.size() &&
-			std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
-			!= constTextlinesIndexes.end())
+		if (buttons.size() != constTextlinesIndexes.size() && isIndicatorOnConstTextLine())
 		{
 			down();
 		}
@@ -279,12 +273,16 @@ void Menu::textEntered(char c)
 	TextLine* pTextLine = dynamic_cast<TextLine*>(buttons[indicator]);
 	auto indx = indicator;
 
-	if (pTextLine && std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [indx](std::size_t i) { return i == indx; })
-		             == constTextlinesIndexes.end())
+	if (pTextLine && !isIndicatorOnConstTextLine())
 	{
 		pTextLine->addSymbol(c);
 		setButtonTextPosition(pTextLine);
 	}
+}
+
+void Menu::setTextureCoord(float x, float y)
+{
+	pRect->setTextureCoord(x, y, static_cast<float>(pRect->getWidth()), static_cast<float>(pRect->getHeight()));
 }
 
 void Menu::setTextLineStr(std::size_t indx, const std::string& text)
@@ -292,8 +290,7 @@ void Menu::setTextLineStr(std::size_t indx, const std::string& text)
 	if (buttons.empty()) return;
 
 	TextLine* pTextLine = dynamic_cast<TextLine*>(buttons[indx]);
-	if (pTextLine && std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [indx](std::size_t i) { return i == indx; })
-		              == constTextlinesIndexes.end())
+	if (pTextLine && !isIndicatorOnConstTextLine())
 	{
 		pTextLine->pText->setString(text);
 		pTextLine->pText->setCharacterSize(fontSize);

@@ -28,91 +28,6 @@ IO::~IO()
 	std::for_each(scenes.begin(), scenes.end(), [](Menu* pScene) { delete pScene; });
 }
 
-void IO::createMainScene()
-{
-	createFullWindowSizeScene(&MAIN_SCENE_PTR(scenes));
-						 
-	MAIN_SCENE_PTR(scenes)->createButtons(5);
-	MAIN_SCENE_PTR(scenes)->initButton("One Player", std::bind(&IO::startGame, this), 0);
-	MAIN_SCENE_PTR(scenes)->initButton("Two Players", []() {}, 1);
-	MAIN_SCENE_PTR(scenes)->initButton("Stats", [this] { createStatsScene(); currentScene = Scenes::STATS_SCENE; }, 2);
-	MAIN_SCENE_PTR(scenes)->initButton("Settings", []() {}, 3);
-	MAIN_SCENE_PTR(scenes)->initButton("Exit", [this] { exit = true; }, 4);
-}
-
-void IO::createOnPauseScene()
-{
-	if (!ON_PAUSE_SCENE_PTR(scenes))
-	{
-		createFullWindowSizeScene(&ON_PAUSE_SCENE_PTR(scenes));
-
-		ON_PAUSE_SCENE_PTR(scenes)->createButtons(2);
-		ON_PAUSE_SCENE_PTR(scenes)->initButton("Continue", std::bind(&IO::pauseGame, this), 0);
-		ON_PAUSE_SCENE_PTR(scenes)->initButton("Main menu", [this]() { stopGame(); currentScene = Scenes::MAIN_SCENE; }, 1);
-	}
-}
-
-void IO::createGameSavingScene()
-{
-	if (!SAVE_GAME_SCENE_PTR(scenes))
-	{
-		createFullWindowSizeScene(&SAVE_GAME_SCENE_PTR(scenes));
-		
-		SAVE_GAME_SCENE_PTR(scenes)->createTextLines(1);
-		SAVE_GAME_SCENE_PTR(scenes)->createButtons(2);
-		SAVE_GAME_SCENE_PTR(scenes)->initButton("Enter game name for saving", [] {}, 0);
-		SAVE_GAME_SCENE_PTR(scenes)->initButton("Save", std::bind(&IO::saveFinishedGame, this, true), 1);
-		SAVE_GAME_SCENE_PTR(scenes)->initButton("Do not save", std::bind(&IO::saveFinishedGame, this, false), 2);
-
-		SAVE_GAME_SCENE_PTR(scenes)->setButtonWidth(0, 400);
-		SAVE_GAME_SCENE_PTR(scenes)->removeButtonBorder(0);
-	}
-}
-
-void IO::createStatsScene()
-{
-	if (!STATS_SCENE_PTR(scenes) || GameResultLoader::wasChanged())
-	{
-		delete STATS_SCENE_PTR(scenes);
-		createFullWindowSizeScene(&STATS_SCENE_PTR(scenes));
-
-		auto gameResults = GameResultLoader::loadResults();
-
-		STATS_SCENE_PTR(scenes)->setButtonsSize(600, 35);
-		STATS_SCENE_PTR(scenes)->setFontSize(20);
-		STATS_SCENE_PTR(scenes)->createConstTextLines(gameResults.size());
-		STATS_SCENE_PTR(scenes)->createButtons(1);
-
-		auto size = gameResults.size();
-		for (std::size_t i = 0; i < size; i++)
-		{
-			GameResultLoader::GameResult& result = gameResults[i];
-
-			STATS_SCENE_PTR(scenes)->initButton(std::to_string(i + 1) + "." + result.name +
-				" Wave: " + std::to_string(result.wave) + " Enemies Killed: " + std::to_string(result.enemiesKilled), [] {}, i);
-			STATS_SCENE_PTR(scenes)->removeButtonBorder(i);
-		}
-
-		STATS_SCENE_PTR(scenes)->initButton("Main menu", [this] { currentScene = Scenes::MAIN_SCENE; }, size);
-		STATS_SCENE_PTR(scenes)->setButtonWidth(size, 300);
-	}
-}
-
-void IO::createFullWindowSizeScene(Menu** ppScene)
-{
-	*ppScene = new Menu(static_cast<int>(GameBackground::RightBound), 
-						static_cast<int>(GameBackground::LowerBound),
-		                { 0.0f, 0.0f }, 
-						10.0f,
-						"Resources/Images/menuBackground.png", 
-						"Resources/Fonts/arial.ttf");
-
-	(*ppScene)->setButtonsSize(300, 50);
-	(*ppScene)->setButtonsColor(sf::Color::Black);
-	(*ppScene)->setButtonsTextColor(sf::Color::White);
-	(*ppScene)->setFontSize(30);
-}
-
 void IO::start()
 {
 	while (pWindow->isOpen() && !exit)
@@ -230,4 +145,121 @@ void IO::saveFinishedGame(bool save)
 	killGameThread(std::move(gameThread));
 	currentScene = Scenes::MAIN_SCENE;
 	SAVE_GAME_SCENE_PTR(scenes)->setTextLineStr(0, "Enter game name for saving");
+}
+
+void IO::createMainScene()
+{
+	createFullWindowSizeScene(&MAIN_SCENE_PTR(scenes));
+
+	MAIN_SCENE_PTR(scenes)->createButtons(5);
+	MAIN_SCENE_PTR(scenes)->initButton("One Player", std::bind(&IO::startGame, this), 0);
+	MAIN_SCENE_PTR(scenes)->initButton("Two Players", []() {}, 1);
+	MAIN_SCENE_PTR(scenes)->initButton("Stats", [this] { createStatsScene(); currentScene = Scenes::STATS_SCENE; }, 2);
+	MAIN_SCENE_PTR(scenes)->initButton("Help", [this] { createHelpScene(); currentScene = Scenes::HELP_SCENE; }, 3);
+	MAIN_SCENE_PTR(scenes)->initButton("Exit", [this] { exit = true; }, 4);
+}
+
+void IO::createOnPauseScene()
+{
+	if (!ON_PAUSE_SCENE_PTR(scenes))
+	{
+		createFullWindowSizeScene(&ON_PAUSE_SCENE_PTR(scenes));
+
+		ON_PAUSE_SCENE_PTR(scenes)->createButtons(2);
+		ON_PAUSE_SCENE_PTR(scenes)->initButton("Continue", std::bind(&IO::pauseGame, this), 0);
+		ON_PAUSE_SCENE_PTR(scenes)->initButton("Main menu", [this]() { stopGame(); currentScene = Scenes::MAIN_SCENE; }, 1);
+	}
+}
+
+void IO::createGameSavingScene()
+{
+	if (!SAVE_GAME_SCENE_PTR(scenes))
+	{
+		createFullWindowSizeScene(&SAVE_GAME_SCENE_PTR(scenes));
+
+		SAVE_GAME_SCENE_PTR(scenes)->createTextLines(1);
+		SAVE_GAME_SCENE_PTR(scenes)->createButtons(2);
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Enter game name for saving", [] {}, 0);
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Save", std::bind(&IO::saveFinishedGame, this, true), 1);
+		SAVE_GAME_SCENE_PTR(scenes)->initButton("Do not save", std::bind(&IO::saveFinishedGame, this, false), 2);
+
+		SAVE_GAME_SCENE_PTR(scenes)->setButtonWidth(0, 400);
+		SAVE_GAME_SCENE_PTR(scenes)->removeButtonBorder(0);
+	}
+}
+
+void IO::createStatsScene()
+{
+	if (!STATS_SCENE_PTR(scenes) || GameResultLoader::wasChanged())
+	{
+		delete STATS_SCENE_PTR(scenes);
+		createFullWindowSizeScene(&STATS_SCENE_PTR(scenes));
+
+		auto gameResults = GameResultLoader::loadResults();
+
+		STATS_SCENE_PTR(scenes)->setButtonsSize(600, 35);
+		STATS_SCENE_PTR(scenes)->setFontSize(20);
+		STATS_SCENE_PTR(scenes)->createConstTextLines(gameResults.size());
+		STATS_SCENE_PTR(scenes)->createButtons(1);
+
+		auto size = gameResults.size();
+		for (std::size_t i = 0; i < size; i++)
+		{
+			GameResultLoader::GameResult& result = gameResults[i];
+
+			STATS_SCENE_PTR(scenes)->initButton(std::to_string(i + 1) + "." + result.name +
+				" Wave: " + std::to_string(result.wave) + " Enemies Killed: " + std::to_string(result.enemiesKilled), [] {}, i);
+			STATS_SCENE_PTR(scenes)->removeButtonBorder(i);
+		}
+
+		STATS_SCENE_PTR(scenes)->initButton("Main menu", [this] { currentScene = Scenes::MAIN_SCENE; }, size);
+		STATS_SCENE_PTR(scenes)->setButtonWidth(size, 300);
+	}
+}
+
+void IO::createHelpScene()
+{
+	if (!HELP_SCENE_PTR(scenes))
+	{
+		createFullWindowSizeScene(&HELP_SCENE_PTR(scenes));
+
+		HELP_SCENE_PTR(scenes)->setButtonsSize(700, 28);
+		HELP_SCENE_PTR(scenes)->setFontSize(20);
+
+		constexpr std::size_t NumbOfTextLines = NumbOfPlayerControls * 2 + 1;
+		HELP_SCENE_PTR(scenes)->createConstTextLines(NumbOfTextLines);
+		HELP_SCENE_PTR(scenes)->createButtons(1);
+
+		for (std::size_t i = 0; i < 2; i++)
+		{
+			const std::string* pKeysStr = i ? SecondPlayerKeysStr : FirstPlayerKeysStr;
+			const std::string player = i ? "Second Player " : "First Player ";
+
+			for (std::size_t j = 0; j < NumbOfPlayerControls; j++)
+			{
+				HELP_SCENE_PTR(scenes)->initButton(player + pKeysStr[j], [] {}, i * NumbOfPlayerControls + j);
+				HELP_SCENE_PTR(scenes)->removeButtonBorder(i * NumbOfPlayerControls + j);
+			}
+		}
+
+		HELP_SCENE_PTR(scenes)->initButton("Pause/Back: ESCAPE", [] {}, NumbOfTextLines - 1);
+		HELP_SCENE_PTR(scenes)->removeButtonBorder(NumbOfTextLines - 1);
+		HELP_SCENE_PTR(scenes)->initButton("Main menu", [this] { currentScene = Scenes::MAIN_SCENE; }, NumbOfTextLines);
+		HELP_SCENE_PTR(scenes)->setButtonWidth(NumbOfTextLines, 300);
+	}
+}
+
+void IO::createFullWindowSizeScene(Menu** ppScene)
+{
+	*ppScene = new Menu(static_cast<int>(GameBackground::RightBound),
+		static_cast<int>(GameBackground::LowerBound),
+		{ 0.0f, 0.0f },
+		10.0f,
+		"Resources/Images/menuBackground.png",
+		"Resources/Fonts/arial.ttf");
+
+	(*ppScene)->setButtonsSize(300, 50);
+	(*ppScene)->setButtonsColor(sf::Color::Black);
+	(*ppScene)->setButtonsTextColor(sf::Color::White);
+	(*ppScene)->setFontSize(30);
 }

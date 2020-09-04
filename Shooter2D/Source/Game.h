@@ -5,6 +5,7 @@
 #include <SFML/System/Clock.hpp>
 #include <condition_variable>
 #include <atomic>
+#include <array>
 
 enum class PlayerControls;
 class IO;
@@ -12,10 +13,18 @@ class Player;
 class Level;
 class GameInfo;
 
+constexpr std::size_t NumbOfPlayerControls = 11;
+
+extern const std::string FirstPlayerKeysStr[NumbOfPlayerControls];
+extern const std::string SecondPlayerKeysStr[NumbOfPlayerControls];
+
 struct MappingKeysToControls
 {
-	MappingKeysToControls();
-	std::unordered_map<PlayerControls, unsigned int> mapping;
+	MappingKeysToControls(std::array<sf::Keyboard::Key, NumbOfPlayerControls> keys);
+
+	void change(PlayerControls control, sf::Keyboard::Key newKey);
+
+	std::unordered_map<PlayerControls, sf::Keyboard::Key> mapping;
 };
 
 class Game
@@ -35,7 +44,6 @@ private:
 	void saveGame(std::shared_ptr<GameInfo> pGameInfo);
 
 private:
-	std::shared_ptr<MappingKeysToControls> pMapping;
 	std::condition_variable state;
 	std::mutex mutex;
 	IO* io;

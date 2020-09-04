@@ -101,22 +101,22 @@ TextureRectangle::TextureRectangle(float left, float top, int width, int height,
 	: Rectangle(left, top, width, height, sf::Color::White, borderSize, borderColor),
 	  pTexture(pTex)
 {
-	setTextureCoord(static_cast<float>(width), static_cast<float>(height));
+	setTextureCoord(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height));
 }
 
 TextureRectangle::TextureRectangle(const sf::Vector2f& position_, const sf::Vector2i& size, sf::Texture* pTex, std::size_t borderSize, const sf::Color& borderColor)
 	: Rectangle(position_, size, sf::Color::White, borderSize, borderColor),
 	  pTexture(pTex)
 {
-	setTextureCoord(static_cast<float>(size.x), static_cast<float>(size.y));
+	setTextureCoord(0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y));
 }
 
-void TextureRectangle::setTextureCoord(float width, float height)
+void TextureRectangle::setTextureCoord(float x, float y, float width, float height)
 {
-	pRectangle[0][0].texCoords = sf::Vector2f(0.0f, 0.0f);
-	pRectangle[0][1].texCoords = sf::Vector2f(width, 0.0f);
-	pRectangle[0][2].texCoords = sf::Vector2f(width, height);
-	pRectangle[0][3].texCoords = sf::Vector2f(0.0f, height);
+	pRectangle[0][0].texCoords = sf::Vector2f(x, y);
+	pRectangle[0][1].texCoords = sf::Vector2f(x + width, y);
+	pRectangle[0][2].texCoords = sf::Vector2f(x + width, y + height);
+	pRectangle[0][3].texCoords = sf::Vector2f(x, y + height);
 }
 
 void TextureRectangle::draw(sf::RenderTarget& target, sf::RenderStates states) const

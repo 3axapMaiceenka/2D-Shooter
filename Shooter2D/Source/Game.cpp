@@ -8,9 +8,51 @@
 #include <thread>
 #include <unordered_map>
 
+const std::array<sf::Keyboard::Key, NumbOfPlayerControls> FirstPlayerKeys = 
+{
+	sf::Keyboard::Key::W,
+	sf::Keyboard::Key::S,
+	sf::Keyboard::Key::A,
+	sf::Keyboard::Key::D,
+	sf::Keyboard::Key::LShift,
+	sf::Keyboard::Key::R,
+	sf::Keyboard::Key::Num1,
+	sf::Keyboard::Key::Num2,
+	sf::Keyboard::Key::Num3,
+	sf::Keyboard::Key::Num4,
+	sf::Keyboard::Key::Num5
+};
+
+const std::array<sf::Keyboard::Key, NumbOfPlayerControls> SecondPlayerKeys =
+{
+	sf::Keyboard::Key::Up,
+	sf::Keyboard::Key::Down,
+	sf::Keyboard::Key::Left,
+	sf::Keyboard::Key::Right,
+	sf::Keyboard::Key::RControl,
+	sf::Keyboard::Key::P,
+	sf::Keyboard::Key::Num6,
+	sf::Keyboard::Key::Num7,
+	sf::Keyboard::Key::Num8,
+	sf::Keyboard::Key::Num9,
+	sf::Keyboard::Key::Num0
+};
+
+std::shared_ptr<MappingKeysToControls> pFirstPlayerMapping = std::make_shared<MappingKeysToControls>(FirstPlayerKeys);
+std::shared_ptr<MappingKeysToControls> pSecondPlayerMapping = std::make_shared<MappingKeysToControls>(SecondPlayerKeys);
+
+const std::string FirstPlayerKeysStr[NumbOfPlayerControls] = 
+{
+	"Move Up: W", "Move Down: S", "Move Left: A", "Move Right: D", "Shoot: Left Shift", "Reload: R", "First Gun: 1", "Second gun: 2", "Third Gun: 3", "Fourth Gun: 4", "Fifth Gun: 5"
+};
+
+const std::string SecondPlayerKeysStr[NumbOfPlayerControls] =
+{
+	"Move Up: : UP", "Move Down: DOWN", "Move Left: LEFT", "Move Right : RIGHT", "Shoot: Right Control", "Reload: P", "First Gun: 6", "Second gun: 7", "Third Gun: 8", "Fourth Gun: 9", "Fifth Gun: 0"
+};
+
 Game::Game(IO* io_)
-	: pMapping(std::make_shared<MappingKeysToControls>()),
-	  state(),
+	: state(),
 	  mutex(),
 	  io(io_),
 	  activeContext(false),
@@ -20,7 +62,7 @@ Game::Game(IO* io_)
 std::thread Game::start()
 {
 	auto pGameInfo = std::make_shared<GameInfo>(io);
-	auto pPlayer = std::make_shared<Player>(io, pGameInfo, sf::Vector2f(500.0f, 500.0f), pMapping);
+	auto pPlayer = std::make_shared<Player>(io, pGameInfo, sf::Vector2f(500.0f, 500.0f), pFirstPlayerMapping);
 	auto pLevel = std::make_shared<Level>(io, pGameInfo);
 
 	io->setActiveContext(false);
@@ -158,18 +200,23 @@ bool Game::isGameFinished()
 	return finished;
 }
 
-MappingKeysToControls::MappingKeysToControls()
+MappingKeysToControls::MappingKeysToControls(std::array<sf::Keyboard::Key, NumbOfPlayerControls> keys)
 	: mapping()
 {
-	mapping.emplace(PlayerControls::UP,     static_cast<unsigned int>(sf::Keyboard::Key::W));
-	mapping.emplace(PlayerControls::DOWN,   static_cast<unsigned int>(sf::Keyboard::Key::S));
-	mapping.emplace(PlayerControls::LEFT,   static_cast<unsigned int>(sf::Keyboard::Key::A));
-	mapping.emplace(PlayerControls::RIGHT,  static_cast<unsigned int>(sf::Keyboard::Key::D));
-	mapping.emplace(PlayerControls::SHOOT,  static_cast<unsigned int>(sf::Keyboard::Key::LShift));
-	mapping.emplace(PlayerControls::RELOAD, static_cast<unsigned int>(sf::Keyboard::Key::R));
-	mapping.emplace(PlayerControls::GUN1,   static_cast<unsigned int>(sf::Keyboard::Key::Num1));
-	mapping.emplace(PlayerControls::GUN2,   static_cast<unsigned int>(sf::Keyboard::Key::Num2));
-	mapping.emplace(PlayerControls::GUN3,   static_cast<unsigned int>(sf::Keyboard::Key::Num3));
-	mapping.emplace(PlayerControls::GUN4,   static_cast<unsigned int>(sf::Keyboard::Key::Num4));
-	mapping.emplace(PlayerControls::GUN5,   static_cast<unsigned int>(sf::Keyboard::Key::Num5));
+	mapping.emplace(PlayerControls::UP,     (keys[0]));
+	mapping.emplace(PlayerControls::DOWN,   (keys[1]));
+	mapping.emplace(PlayerControls::LEFT,   (keys[2]));
+	mapping.emplace(PlayerControls::RIGHT,  (keys[3]));
+	mapping.emplace(PlayerControls::SHOOT,  (keys[4]));
+	mapping.emplace(PlayerControls::RELOAD, (keys[5]));
+	mapping.emplace(PlayerControls::GUN1,   (keys[6]));
+	mapping.emplace(PlayerControls::GUN2,   (keys[7]));
+	mapping.emplace(PlayerControls::GUN3,   (keys[8]));
+	mapping.emplace(PlayerControls::GUN4,   (keys[9]));
+	mapping.emplace(PlayerControls::GUN5,   (keys[10]));
+}
+
+void MappingKeysToControls::change(PlayerControls control, sf::Keyboard::Key newKey)
+{
+	mapping[control] = newKey;
 }

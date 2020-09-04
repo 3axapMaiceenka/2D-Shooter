@@ -33,7 +33,7 @@ enum class Scenes
 {
 	MAIN_SCENE,
 	ON_PAUSE_SCENE,
-	SETTINGS_SCENE,
+	HELP_SCENE,
 	STATS_SCENE,
 	SAVE_GAME_SCENE
 };
@@ -41,7 +41,7 @@ enum class Scenes
 #define CURRENT_SCENE_PTR(scenes, currentScene) scenes[static_cast<std::size_t>(currentScene)]
 #define MAIN_SCENE_PTR(scenes)      CURRENT_SCENE_PTR(scenes, Scenes::MAIN_SCENE)			
 #define ON_PAUSE_SCENE_PTR(scenes)	CURRENT_SCENE_PTR(scenes, Scenes::ON_PAUSE_SCENE)			
-#define SETTINGS_SCENE_PTR(scenes)	CURRENT_SCENE_PTR(scenes, Scenes::SETTINGS_SCENE)			
+#define HELP_SCENE_PTR(scenes)	    CURRENT_SCENE_PTR(scenes, Scenes::HELP_SCENE)			
 #define STATS_SCENE_PTR(scenes)		CURRENT_SCENE_PTR(scenes, Scenes::STATS_SCENE)			
 #define SAVE_GAME_SCENE_PTR(scenes)	CURRENT_SCENE_PTR(scenes, Scenes::SAVE_GAME_SCENE)			
 
@@ -75,6 +75,7 @@ private:
 	}
 
 	void createMainScene();
+    void createHelpScene(); 
 	void createStatsScene();
 	void createOnPauseScene();
 	void createGameSavingScene();

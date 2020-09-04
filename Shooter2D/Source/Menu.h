@@ -26,6 +26,7 @@ public:
 	void textEntered(char c);
 	void setPosition(float x, float y);
 	void setFontSize(unsigned char size);
+	void setTextureCoord(float x, float y);
 	std::string getTextLineStr(std::size_t indx);
 	void setButtonsColor(const sf::Color& color);
 	void createButtons(std::size_t buttonsNumber);
@@ -42,6 +43,12 @@ private:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	void calcButtonsParams(float& distance, float& buttonsX, float& firstButtonY);
 	void moveIndicator();
+
+	bool isIndicatorOnConstTextLine() const
+	{
+		return std::find_if(constTextlinesIndexes.begin(), constTextlinesIndexes.end(), [this](std::size_t i) { return i == indicator; })
+			!= constTextlinesIndexes.end();
+	}
 
 	template <typename T>
 	void createMenuObjectsImpl(std::size_t count);
