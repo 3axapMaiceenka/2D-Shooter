@@ -2,6 +2,7 @@
 #include "ShootingControl.h"
 #include "GameInfo.h"
 #include "Factory.h"
+#include "Player.h"
 #include "IO.h"
 
 GameInfo::GameInfo(IO* io_)
@@ -9,8 +10,8 @@ GameInfo::GameInfo(IO* io_)
 	  pProgressBar(new Rectangle(ProgressBarX, ProgressBarY, 1, ProgressBarHeight, sf::Color::Green)),
 	  pTextBox(new TextBox),
 	  pBorder(new Border(BorderSize, sf::Color::Green)),
-	  pGunImages(new std::vector<sf::Sprite>),
 	  io(io_),
+	  pGunImages(new std::vector<sf::Sprite>),
 	  enemiesKilled(0),
 	  wave(1)
 {
@@ -91,5 +92,45 @@ void GameInfo::saveToFile() const
 {
 	GameResultLoader::storeResult(io->getGameName(), wave, enemiesKilled);
 }
+
+void GameInfo::indicateCurrentGun(unsigned char indx, ShootingControl* pShootingControl)
+{ 
+	pBorder->createBorderAround(pGunImages[0][indx]);
+}
+
+TwoPGameInfo::TwoPGameInfo(IO* io)
+	: GameInfo(io),
+	  pSecondPBorder(new Border(BorderSize, sf::Color::Green)),
+	  pFirstPlayerSC(nullptr),
+	  pSecondPlayerSC(nullptr)
+{ 
+	pSecondPBorder->createBorderAround(pGunImages->front());
+}
+
+TwoPGameInfo::~TwoPGameInfo()
+{
+	delete pSecondPBorder;
+}
+
+void TwoPGameInfo::draw() const
+{
+	GameInfo::draw();
+	io->draw(pSecondPBorder);
+}
+
+void TwoPGameInfo::indicateCurrentGun(unsigned char indx, ShootingControl* pShootingControl)
+{
+	if (pShootingControl == pFirstPlayerSC || !pFirstPlayerSC)
+	{
+		pFirstPlayerSC = pShootingControl;
+		pBorder->createBorderAround(pGunImages[0][indx]);
+	}
+	else
+	{
+		pSecondPlayerSC = pShootingControl;
+		pSecondPBorder->createBorderAround(pGunImages[0][indx]);
+	}
+}
+
 
 

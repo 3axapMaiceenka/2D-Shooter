@@ -33,15 +33,17 @@ public:
 	Game(IO* io_);
 
 	void finishGame();
-	std::thread start();
+	std::thread startOnePGame();
+	std::thread startTwoPGame();
 	bool isGameFinished();
 	void setPause(bool onPause = true);
 	void setNeedToSave(bool toSave = true);
 
 private:
-	void gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo);
 	void checkForPause(sf::Clock& clock);
 	void saveGame(std::shared_ptr<GameInfo> pGameInfo);
+	void onePGameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo);
+	void twoPGameLoop(std::shared_ptr<Player> pFirstPlayer, std::shared_ptr<Player> pSecondPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo);
 
 private:
 	std::condition_variable state;

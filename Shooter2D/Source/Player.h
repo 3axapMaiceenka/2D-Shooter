@@ -27,7 +27,7 @@ enum class PlayerControls
 class Player : public AnimatedObject
 {
 public:
-	Player(IO* io_, std::shared_ptr<GameInfo> pGameInfo, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls);
+	Player(IO* io_, std::shared_ptr<GameInfo> pGameInfo, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls, const std::string& texturePath);
 
 	virtual int width()  const override;
 	virtual int height() const override;
@@ -36,9 +36,9 @@ public:
 	bool fire();
 	void draw() const;
 
-	unsigned char damage() const { return pShootingControl->getCurrentGunDamage(); }
 	void increaseMoney(unsigned int value) { pShootingControl->increaseMoney(value); }
-	auto getShotPosition() const { return pShootingControl->getShotPosition(position); }
+	unsigned char damage() const           { return pShootingControl->getCurrentGunDamage(); }
+	auto getShotPosition() const           { return pShootingControl->getShotPosition(position); }
 
 protected:
 	virtual float speed() const override;

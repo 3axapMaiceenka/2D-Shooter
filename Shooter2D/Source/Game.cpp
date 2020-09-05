@@ -59,19 +59,32 @@ Game::Game(IO* io_)
 	  gameOver(false), pause(false), finished(false), shouldSave(false), decisionToSave(false)
 { }
 
-std::thread Game::start()
+std::thread Game::startOnePGame()
 {
 	auto pGameInfo = std::make_shared<GameInfo>(io);
-	auto pPlayer = std::make_shared<Player>(io, pGameInfo, sf::Vector2f(500.0f, 500.0f), pFirstPlayerMapping);
-	auto pLevel = std::make_shared<Level>(io, pGameInfo);
+	auto pPlayer   = std::make_shared<Player>(io, pGameInfo, sf::Vector2f(500.0f, 500.0f), pFirstPlayerMapping, "Resources/Images/player1.png");
+	auto pLevel    = std::make_shared<Level>(io, pGameInfo);
 
 	io->setActiveContext(false);
-	std::thread game(&Game::gameLoop, this, pPlayer, pLevel, pGameInfo);
+	std::thread game(&Game::onePGameLoop, this, pPlayer, pLevel, pGameInfo);
 	
 	return game;
 }
 
-void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo)
+std::thread Game::startTwoPGame()
+{
+	auto pGameInfo     = std::make_shared<TwoPGameInfo>(io);
+	auto pFirstPlayer  = std::make_shared<Player>(io, pGameInfo, sf::Vector2f(500.0f, 500.0f), pFirstPlayerMapping, "Resources/Images/player1.png");
+	auto pSecondPlayer = std::make_shared<Player>(io, pGameInfo, sf::Vector2f(500.0f, 300.0f), pSecondPlayerMapping, "Resources/Images/player2.png");
+	auto pLevel        = std::make_shared<Level>(io, pGameInfo);
+
+	io->setActiveContext(false);
+	std::thread game(&Game::twoPGameLoop, this, pFirstPlayer, pSecondPlayer, pLevel, pGameInfo);
+
+	return game;
+}
+
+void Game::onePGameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo)
 {
 	io->setActiveContext(true);
 	activeContext = true;
@@ -107,6 +120,65 @@ void Game::gameLoop(std::shared_ptr<Player> pPlayer, std::shared_ptr<Level> pLev
 
 		pGameInfo->draw();
 		pPlayer->draw();
+		pLevel->draw();
+
+		io->display();
+	}
+
+	{
+		std::scoped_lock lock(mutex);
+
+		io->setActiveContext(false);
+		activeContext = false;
+		finished = true;
+	}
+
+	saveGame(pGameInfo);
+}
+
+void Game::twoPGameLoop(std::shared_ptr<Player> pFirstPlayer, std::shared_ptr<Player> pSecondPlayer, std::shared_ptr<Level> pLevel, std::shared_ptr<GameInfo> pGameInfo)
+{
+	io->setActiveContext(true);
+	activeContext = true;
+
+	sf::Clock clock;
+	gameOver = false;
+	pause = false;
+
+	while (!gameOver)
+	{
+		float elapsedTime = static_cast<float>(clock.restart().asMilliseconds());
+
+		checkForPause(clock); // if the game was on pause, the clock will be restarted in that function
+		if (finished)
+		{
+			break;
+		}
+
+		pFirstPlayer->move(elapsedTime);
+		pSecondPlayer->move(elapsedTime);
+
+		if (pFirstPlayer->fire())
+		{
+			pLevel->addShot(pFirstPlayer->getShotPosition(), pFirstPlayer.get(), pFirstPlayer->damage());
+		}
+
+		if (pSecondPlayer->fire())
+		{
+			pLevel->addShot(pSecondPlayer->getShotPosition(), pSecondPlayer.get(), pSecondPlayer->damage());
+		}
+
+		if (!pLevel->update(elapsedTime))
+		{
+			break;
+		}
+
+		io->clearWindow();
+		io->drawGameBackground();
+
+		pGameInfo->draw();
+		pFirstPlayer->draw();
+		pSecondPlayer->draw();
 		pLevel->draw();
 
 		io->display();

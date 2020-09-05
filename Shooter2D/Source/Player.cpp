@@ -5,8 +5,8 @@
 
 #include <string>
 
-Player::Player(IO* io_, std::shared_ptr<GameInfo> pGameInfo, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls)
-	: AnimatedObject(TextureFactory::getInstance().loadFromFile("Resources/Images/player1.png"), pos),
+Player::Player(IO* io_, std::shared_ptr<GameInfo> pGameInfo, const sf::Vector2f& pos, std::shared_ptr<MappingKeysToControls> pMappingKeysToControls, const std::string& texturePath)
+	: AnimatedObject(TextureFactory::getInstance().loadFromFile(texturePath), pos),
 	  pShootingControl(std::make_unique<ShootingControl>(pos, pGameInfo)),
 	  pMapping(pMappingKeysToControls),
 	  io(io_),

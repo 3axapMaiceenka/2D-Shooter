@@ -37,7 +37,7 @@ void ShootingControl::initGuns()
 	{
 		guns.emplace_back(reloadingTime, delay, price, numberOfShots, damage);
 		reloadingTime += 500;
-		price += 500;
+		price +=500;
 		numberOfShots += 4;
 		delay -= 100;
 		damage++;
@@ -135,7 +135,7 @@ bool ShootingControl::setNewGun(unsigned char indx)
 		playerMoney -= guns[indx].price;
 		guns[indx].price = 0;
 		currentGun = indx;
-		pGameInfo->indicateCurrentGun(indx);
+		pGameInfo->indicateCurrentGun(indx, this);
 		pMoneyLabel->setString(std::to_string(playerMoney) + "$");
 
 		if (!guns[currentGun].shots)

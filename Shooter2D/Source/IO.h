@@ -63,8 +63,9 @@ public:
 
 private:
 	void stopGame();
-	void startGame();
 	void pauseGame();
+	void startOnePGame();
+	void startTwoPGame();
 	void saveFinishedGame(bool save);
 
 	void drawCurrentScene()

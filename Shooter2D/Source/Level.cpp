@@ -11,16 +11,21 @@ Level::Level(IO* io_, std::shared_ptr<GameInfo> pGi)
 	  pEnemiesFactory(std::make_unique<EnemiesFactory>()),
 	  pShots(std::make_unique<std::list<Shot>>()),
 	  pWave(std::make_unique<Wave>()),
-	  pHitEffect(std::make_unique<std::pair<ParticleSystem, bool>>(std::make_pair(ParticleSystem(), false))),
+	  pHitEffects(std::make_unique<HitEffects>()),
 	  pGameInfo(pGi),
 	  io(io_)
-{ }
+{ 
+	pHitEffects->firstHitEffect.second  = false;
+	pHitEffects->secondHitEffect.second = false;
+}
 
 bool Level::update(float time)
 {
 	generateEnemies();
 
-	pHitEffect->second = pHitEffect->first.update(time);
+	if (pHitEffects->firstHitEffect.second)  pHitEffects->firstHitEffect.second  = pHitEffects->firstHitEffect.first.update(time);
+	if (pHitEffects->secondHitEffect.second) pHitEffects->secondHitEffect.second = pHitEffects->secondHitEffect.first.update(time);
+	
 	updateShots(time);
 
 	return updateEnemies(time);
@@ -38,7 +43,7 @@ bool Level::updateEnemies(float time)
 		if (itShot != pShots->end())
 		{
 			itShot->getPlayer()->increaseMoney(pEnemy->moneyForHit());
-			pHitEffect->first = ParticleSystem(itShot->getPosition(), ParticlesCount);
+			createHitEffect(&(*itShot));
 			pShots->erase(itShot);
 		}
 
@@ -82,10 +87,8 @@ void Level::draw() const
 	std::for_each(pShots->cbegin(), pShots->cend(), [this](const Shot& shot) { io->draw(shot.getSprite()); });
 	std::for_each(pEnemies->cbegin(), pEnemies->cend(), [this](const Enemy* pEnemy) { io->draw(pEnemy->getSprite()); });
 	
-	if (pHitEffect->second)
-	{
-		io->draw(&pHitEffect->first);
-	}
+	if (pHitEffects->firstHitEffect.second)  io->draw(&pHitEffects->firstHitEffect.first);
+	if (pHitEffects->secondHitEffect.second) io->draw(&pHitEffects->secondHitEffect.first);
 }
 
 void Level::enemiesDeleter(std::list<Enemy*>* pEnemies)
@@ -123,6 +126,20 @@ void Level::generateEnemies()
 		pEnemies->emplace_back(pEnemiesFactory->createEnemy());
 		pWave->currentEnemiesCount++;
 		pWave->clock.restart();
+	}
+}
+
+void Level::createHitEffect(Shot* pShot)
+{
+	if (!pHitEffects->firstHitEffect.second)
+	{
+		pHitEffects->firstHitEffect.first = ParticleSystem(pShot->getPosition(), ParticlesCount);
+		pHitEffects->firstHitEffect.second = true;
+	}
+	else
+	{
+		pHitEffects->secondHitEffect.first = ParticleSystem(pShot->getPosition(), ParticlesCount);
+		pHitEffects->secondHitEffect.second = true;
 	}
 }
 

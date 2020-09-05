@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 
 class IO;
+class ShootingControl;
 
 constexpr float GunImagesOffsetX = 2.0f;
 constexpr float GunImagesOffsetY = 3.0f;
@@ -25,14 +26,14 @@ class GameInfo
 {
 public:
 	GameInfo(IO* io_);
-	~GameInfo();
+	virtual ~GameInfo();
 
 	void incWave();
-	void draw() const;
 	void saveToFile() const;
 	void incEnemiesKilled(float ratio);
 
-	void indicateCurrentGun(unsigned char indx) { pBorder->createBorderAround(pGunImages[0][indx]); }
+	virtual void draw() const;
+	virtual void indicateCurrentGun(unsigned char indx, ShootingControl* pShootingControl);
 
 private:
 	void initTextBox();
@@ -51,9 +52,28 @@ private:
 	Rectangle* pLabelsBox;
 	Rectangle* pProgressBar;
 	TextBox* pTextBox;
+
+protected:
 	Border* pBorder;
-	std::vector<sf::Sprite>* pGunImages;
 	IO* io;
+	std::vector<sf::Sprite>* pGunImages;
+
+private:
 	unsigned short enemiesKilled;
 	unsigned short wave;
+};
+
+class TwoPGameInfo : public GameInfo
+{
+public:
+	TwoPGameInfo(IO* io);
+	~TwoPGameInfo();
+
+	virtual void draw() const override;
+	virtual void indicateCurrentGun(unsigned char indx, ShootingControl* pShootingControl) override;
+
+private:
+	Border* pSecondPBorder;
+	ShootingControl* pFirstPlayerSC;
+	ShootingControl* pSecondPlayerSC;
 };

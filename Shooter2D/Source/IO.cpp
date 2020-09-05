@@ -90,10 +90,16 @@ void IO::killGameThread(std::thread&& gameThread)
 	pWindow->setActive(true);
 }
 
-void IO::startGame()
+void IO::startOnePGame()
 {
 	pGame = new Game(this);
-	gameThread = pGame->start();
+	gameThread = pGame->startOnePGame();
+}
+
+void IO::startTwoPGame()
+{
+	pGame = new Game(this);
+	gameThread = pGame->startTwoPGame();
 }
 
 GameBackground::GameBackground()
@@ -152,8 +158,8 @@ void IO::createMainScene()
 	createFullWindowSizeScene(&MAIN_SCENE_PTR(scenes));
 
 	MAIN_SCENE_PTR(scenes)->createButtons(5);
-	MAIN_SCENE_PTR(scenes)->initButton("One Player", std::bind(&IO::startGame, this), 0);
-	MAIN_SCENE_PTR(scenes)->initButton("Two Players", []() {}, 1);
+	MAIN_SCENE_PTR(scenes)->initButton("One Player", std::bind(&IO::startOnePGame, this), 0);
+	MAIN_SCENE_PTR(scenes)->initButton("Two Players", std::bind(&IO::startTwoPGame, this), 1);
 	MAIN_SCENE_PTR(scenes)->initButton("Stats", [this] { createStatsScene(); currentScene = Scenes::STATS_SCENE; }, 2);
 	MAIN_SCENE_PTR(scenes)->initButton("Help", [this] { createHelpScene(); currentScene = Scenes::HELP_SCENE; }, 3);
 	MAIN_SCENE_PTR(scenes)->initButton("Exit", [this] { exit = true; }, 4);
